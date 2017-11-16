@@ -1,7 +1,7 @@
 #!/bin/sh
 dir="nlp"
 
-if [ "$1" != "" ]; then
+if [[ "$1" != "" ]]; then
 	echo "Launching Program $1"
 	gcloud compute instances start instance-1
 
@@ -25,7 +25,8 @@ if [ "$1" != "" ]; then
 	done
 
 	if [[ loaded -ne 1 ]]; then
-		gcloud compute ssh instance-1 --command="cd ./$dir && export LD_LIBRARY_PATH=/usr/local/cuda-8.0/lib64\${LD_LIBRARY_PATH:+:\${LD_LIBRARY_PATH}} && export PATH=/usr/local/cuda-8.0/bin\${PATH:+:\${PATH}} && export PATH=~/bin:\$PATH && autorun.sh $1" 
+		gcloud compute ssh instance-1 --command="cd ./$dir && export LD_LIBRARY_PATH=/usr/local/cuda-8.0/lib64\${LD_LIBRARY_PATH:+:\${LD_LIBRARY_PATH}} && export PATH=/usr/local/cuda-8.0/bin\${PATH:+:\${PATH}} && export PATH=~/bin:\$PATH && autorun.sh $1"
+		gcloud compute instances stop instance-1 
 	fi
 
 else
