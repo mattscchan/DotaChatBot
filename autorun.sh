@@ -6,8 +6,8 @@ if [ "$1" != "" ]; then
 	echo "Launching Program $1"
 	gcloud compute instances start instance-1
 
-	if [ "$3" == "s" ] || [ "$3" == "S" ]; then
-		echo "Waiting a minute so that the instance can start properly."
+	if [ "$2" != "s" ] && [ "$2" != "S" ]; then
+		echo "Waiting 30s so that the instance can start properly."
 		sleep 30
 		echo "\a"
 	fi
