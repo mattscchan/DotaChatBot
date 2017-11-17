@@ -1,7 +1,7 @@
 #!/bin/sh
 dir="nlp"
 
-if [[ "$1" != "" ]]; then
+if [ "$1" != "" ]; then
 	echo "Launching Program $1"
 	gcloud compute instances start instance-1
 
@@ -10,10 +10,10 @@ if [[ "$1" != "" ]]; then
 	echo "Attempting to SCP file to server."
 	gcloud compute scp ./$1 instance-1:~/$dir/
 
-	while [[ $? -ne 0 ]]; do
+	while [ $? != 0 ]; do
 		echo "Attempting to SCP file to server."
 		gcloud compute scp ./$1 instance-1:~/dir
-		if [[ counter -gt 10 ]]; then
+		if [ counter > 10 ]; then
 			echo "Failed to push file to server."
 			loaded=1
 			break
@@ -24,9 +24,11 @@ if [[ "$1" != "" ]]; then
 		counter+=1
 	done
 
-	if [[ loaded -ne 1 ]]; then
-		gcloud compute ssh instance-1 --command="cd ./$dir && export LD_LIBRARY_PATH=/usr/local/cuda-8.0/lib64\${LD_LIBRARY_PATH:+:\${LD_LIBRARY_PATH}} && export PATH=/usr/local/cuda-8.0/bin\${PATH:+:\${PATH}} && export PATH=~/bin:\$PATH && autorun.sh $1"
-		gcloud compute instances stop instance-1 
+	if [ loaded != 1 ]; then
+		gcloud compute ssh instance-1 --command="cd ./$dir && export LD_LIBRARY_PATH=/usr/local/cuda-8.0/lib64\${LD_LIBRARY_PATH:+:\${LD_LIBRARY_PATH}} && export PATH=/usr/local/cuda-8.0/bin\${PATH:+:\${PATH}} && python3 $1" 
+		if [ "$3" != "&"  ]; then
+			gcloud compute instances stop instance-1
+		fi
 	fi
 
 else
