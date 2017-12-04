@@ -3,13 +3,17 @@ import json
 import gzip
 import argparse
 
-write_list = []
-unit_num = {}
 
 def main(args):
-	with gzip.open(args.filename, 'r') as f:
+	write_list = []
+	unit_num = {}
+	total_matches = 0
+	count = 0
+	prev_matches = 0
+
+	with gzip.open(args.input, 'rt', encoding='utf-8') as f:
 		csv_reader = csv.reader(f)
-		count = 0
+
 		for row in csv_reader:
 			if row[20] != "":
 				if count > 1:
@@ -57,34 +61,42 @@ def main(args):
 					unit_num.clear()
 					write_list.append(xml_string)
 				count += 1
+				prev_matches = total_matches
 
-			if count%100000 == 0:
+			if (count%10000 == 0) and (prev_matches==total_matches):
+				print("Conversation number", count, "of", total_matches)
+
+			if (count%100000 == 0) and (prev_matches==total_matches):
+				total_matches=prev_matches
 				print("We are at chat number: ", count)
 				print("Writing to file...")
 
-				with open(args.output+'.xml', 'a') as xml:
+				with open(args.output, 'a', encoding='utf-8') as xml:
 					if count == 10000:
 						xml.write('<data>\n')
+
 					for element in write_list:
 						xml.write(element)
 
 					del write_list[:]
+			total_matches += 1
 
-	with open(args.output'.xml', 'a') as xml:
+	with open(args.output, 'a', encoding='utf-8') as xml:
 		print("We are at chat number: ", count)
 		print("Writing to file...")
 
-		if count == 10000:
-			xml.write('<data>\n')
 		for element in write_list:
 			xml.write(element)
 
 		del write_list[:]
 		xml.write('</data>')
 
+	print("Conversation number", count, "of", total_matches)
+
+
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
-	parser.add_argument('input')
-	parser.add_argument('output')
-	args = parser.parse_arguments()
+	parser.add_argument('input', help='Provide input filename.')
+	parser.add_argument('output', help='Provide output filename.')
+	args = parser.parse_args()
 	main(args)
