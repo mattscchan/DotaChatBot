@@ -7,6 +7,8 @@ def main(args):
 	word_counts = Counter()
 	csv.field_size_limit(2147483647)
 	dictionary = {}
+	corpus = []
+	example = []
 	with open(args.filename, newline='', encoding='utf-8') as f:
 		csv_reader = csv.reader(f, delimiter='\t')
 		# Each line is an example
@@ -14,17 +16,23 @@ def main(args):
 			for utterance in line:
 				words_list = utterance.split(' ')
 				words_list = [word.lower() for word in words_list]
+				# Add this all to one running list
+				example.append(words_list)
 				# Track word frequencies
 				word_counts.update(words_list)
+			corpus.append(example)
 		print(len(word_counts))
-
+		print(corpus[0])
 		freq = []
+		unk_count = 0
 		for el in word_counts:
 			if word_counts[el] < 2:
-				continue
+				unk_count += 1
 			else:
-				freq.append(word_counts[el])
+				dictionary[el] = len(dictionary)
+		word_counts['UNK'] += unk_count
 		print(len(freq))
+		
 
 
 if __name__ == '__main__':
