@@ -30,7 +30,7 @@ def main(args):
 				unk_count += 1
 			else:
 				dictionary[el] = len(dictionary)
-		word_counts['UNK'] += unk_count
+		word_counts['unk'] += unk_count
 		print(len(freq))
 		
 
