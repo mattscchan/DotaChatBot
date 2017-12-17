@@ -20,7 +20,7 @@ def main(args):
 				example.append(words_list)
 				# Track word frequencies
 				word_counts.update(words_list)
-			corpus.append(example)
+			corpus += example
 		print(len(word_counts))
 		print(corpus[0])
 		freq = []
