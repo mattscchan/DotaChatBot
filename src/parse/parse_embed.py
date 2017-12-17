@@ -14,7 +14,7 @@ def main(args):
 		new_convo = []
 		for utterance in convo:
 			if utterance.text == None:
-				new_convo.append('')
+				new_convo.append('UNK')
 			else:
 				new_convo.append(utterance.text)
 		line = '\t'.join(new_convo)

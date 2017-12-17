@@ -7,7 +7,7 @@ def main(args):
 		for line in f:
 			line = re.sub(r'&','&amp;', line)
 			line = re.sub(r'<(?!/utt>|/s>|/data>|utt|data|s sid="\d*")', '&lt;', line)
-			line = re.sub(r'[^a-zA-Z_\'\\"0-9?!<>,\.:;\[\]{}`~@#$%^*()+=|\- /]', '', line)
+			line = re.sub(r'[^a-zA-Z_\'\\"0-9?!<>,\.:;\[\]{}`~@#$%^*()+=|\- /]', 'UNK', line)
 				
 			clean_file.append(line)
 
