@@ -33,8 +33,8 @@ def main(args):
 
 		index_dictionary = dict(zip(dictionary.values(), dictionary.keys()))
 
-		with open(path.join(path.dirname(args.filename), 'vectors.txt'), encoding='utf-8') as f2:
-			for index in range(0, len(index)):
+		with open(path.join(path.dirname(args.filename), 'vectors.txt'), 'w', encoding='utf-8') as f2:
+			for index in range(0, len(index_dictionary)):
 				f2.write(index_dictionary[index])
 				f2.write('\n')
 		
