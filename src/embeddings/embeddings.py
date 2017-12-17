@@ -2,6 +2,7 @@ import tensorflow as tf
 import argparse
 import csv
 from collections import Counter
+import matplotlib as plt
 
 def main(args):
 	word_counts = Counter()
@@ -17,6 +18,12 @@ def main(args):
 				# Track word frequencies
 				word_counts.update(words_list)
 		print(len(word_counts))
+
+		freq = []
+		for word in word_counts:
+			print(word)
+			break
+			freq.append(word_counts[word])
 
 
 if __name__ == '__main__':
