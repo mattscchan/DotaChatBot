@@ -20,7 +20,7 @@ def main(args):
 
 		freq = []
 		for el in word_counts:
-			if word_counts[el] < 10:
+			if word_counts[el] < 2:
 				continue
 			else:
 				freq.append(word_counts[el])
