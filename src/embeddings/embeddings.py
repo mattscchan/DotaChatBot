@@ -21,9 +21,10 @@ def main(args):
 
 		freq = []
 		for word in word_counts:
-			print(word)
-			break
 			freq.append(word_counts[word])
+
+		plt.plot(freq)
+		plt.show()
 
 
 if __name__ == '__main__':
