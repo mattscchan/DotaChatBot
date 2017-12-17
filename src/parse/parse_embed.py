@@ -13,7 +13,10 @@ def main(args):
 	for convo in xml_root:
 		new_convo = []
 		for utterance in convo:
-			new_convo.append(utterance.text)
+			if utterance.text == None:
+				new_convo.append('')
+			else:
+				new_convo.append(utterance.text)
 		line = '\t'.join(new_convo)
 		line += '\n'
 		new_arr.append(line)
