@@ -2,13 +2,13 @@ import tensorflow as tf
 import argparse
 import csv
 from collections import Counter
+import os.path as path
 
 def main(args):
 	word_counts = Counter()
 	csv.field_size_limit(2147483647)
 	dictionary = {}
-	corpus = []
-	example = []
+	
 	with open(args.filename, newline='', encoding='utf-8') as f:
 		csv_reader = csv.reader(f, delimiter='\t')
 		# Each line is an example
@@ -16,13 +16,10 @@ def main(args):
 			for utterance in line:
 				words_list = utterance.split(' ')
 				words_list = [word.lower() for word in words_list]
-				# Add this all to one running list
-				example.append(words_list)
 				# Track word frequencies
 				word_counts.update(words_list)
-			corpus += example
 		print(len(word_counts))
-		print(corpus[0])
+		
 		freq = []
 		unk_count = 0
 		for el in word_counts:
@@ -31,7 +28,15 @@ def main(args):
 			else:
 				dictionary[el] = len(dictionary)
 		word_counts['unk'] += unk_count
+		print('UNK: ', word_counts['unk'])
 		print(len(freq))
+
+		index_dictionary = dict(zip(dictionary.values(), dictionary.keys()))
+
+		with open(path.join(path.dirname(args.filename), 'vectors.txt'), encoding='utf-8') as f2:
+			for index in range(0, len(index)):
+				f2.write(index_dictionary[index])
+				f2.write('\n')
 		
 
 
