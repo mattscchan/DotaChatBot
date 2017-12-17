@@ -2,7 +2,6 @@ import tensorflow as tf
 import argparse
 import csv
 from collections import Counter
-import matplotlib as plt
 
 def main(args):
 	word_counts = Counter()
@@ -20,11 +19,12 @@ def main(args):
 		print(len(word_counts))
 
 		freq = []
-		for word in word_counts:
-			freq.append(word_counts[word])
-
-		plt.plot(freq)
-		plt.show()
+		for el in word_counts:
+			if word_counts[el] < 10:
+				continue
+			else:
+				freq.append(word_counts[el])
+		print(len(freq))
 
 
 if __name__ == '__main__':
