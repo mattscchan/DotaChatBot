@@ -9,11 +9,10 @@ def main(args):
 	for convo in xml_root:
 		for utterance in convo:
 			if utterance.text == None:
-				chars.append(list('UNK'))
+				chars += list('UNK')
 			else:
-				chars.append(list(utterance.text))
+				chars += list(utterance.text)
 		for c in chars:
-			print(type(c))
 			print(ord(c)-32)	
 		break
 
