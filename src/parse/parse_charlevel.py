@@ -75,7 +75,7 @@ def main(args):
 
 		obj_real = {}
 		obj_fake = {}
-
+		context = []
 		if utt_num < 2:
 			continue
 		elif utt_num < args.context-1:
