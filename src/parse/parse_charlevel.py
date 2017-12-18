@@ -22,10 +22,11 @@ def str_to_int(utt, newline=True):
 		if c == 'π':
 			arr.append(1)
 		else:
-			arr.append(ord(c)+3)
+			arr.append(ord(c)-27)
 
 	if newline:
-		return arr.append(2)
+		arr.append(2)
+		return arr
 	return arr
 
 
@@ -85,41 +86,40 @@ def main(args):
 		obj_real = {}
 		obj_fake = {}
 		context = []
-		print(convo)
+
 		if utt_num < 2:
-			print('1')
 			continue
-		elif utt_num < args.context+1:
-			print('2')
+		elif utt_num-1 < args.context:
 			obj_real['context_size'] = utt_num-1
 			obj_fake['context_size'] = utt_num-1
 			for i in range(0, utt_num-1):
-				print(i)
-				print(convo[i])
 				context += str_to_int(convo[i])
-			next_utt = str_to_int(convo[utt_num])
+				print(context)
+			next_utt = str_to_int(convo[utt_num-1])
 		else:
 			obj_real['context_size'] = args.context
 			obj_fake['context_size'] = args.context
 			for i in range(0, args.context):
-				print('3')
-				print(i)
-				print(convo[i])
 				context += str_to_int(convo[i])
 			next_utt = str_to_int(convo[args.context+1])
 		fake_utt = buff.poll()
 
 		obj_real['next_utt'] = next_utt
+		obj_real['context'] = context
 		obj_real['label'] = 0
 
+		obj_fake['context'] = context
 		obj_fake['next_utt'] = fake_utt
 		obj_fake['label'] = 1 
 		
+		print(obj_real['context'])
+		print(obj_real['next_utt'])
+
 		json_objs.append(obj_real)
 		json_objs.append(obj_fake)
 
 		convo_num += 1
-
+		break
 		if convo_num % 10000 == 0:
 			print(convo_num)
 			with open(json_file, 'a', encoding='utf-8') as f:
