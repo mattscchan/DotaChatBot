@@ -13,7 +13,9 @@ def main(args):
 	chars = []
 	max = -1
 	utt_num = []
+	convo_len = []
 	for convo in xml_root:
+		count = 0
 		for utterance in convo:
 			if utterance.text == None:
 				chars += list('UNK')
@@ -22,7 +24,10 @@ def main(args):
 					max = len(utterance.text)
 				chars += list(utterance.text)
 				utt_num.append(len(utterance.text))
+			count += 1
+		convo_len.append(count)
 	print(np.mean(utt_num))
+	print(np.mean(convo_len))
 		# for c in chars:
 		# 	print(ord(c)-30)	
 		# break
