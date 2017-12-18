@@ -1,5 +1,6 @@
 import tensorflow as tf
 import argparse
+import xml.etree.ElementTree as ET
 
 def main(args):
 	tree = ET.parse(args.filename)
@@ -11,7 +12,7 @@ def main(args):
 				chars.append(list('UNK'))
 			else:
 				chars.append(list(utterance.text))
-		print(chars)
+		chars = [ord(c)-32 for c in chars]
 		break	
 
 if __name__ == '__main__':
