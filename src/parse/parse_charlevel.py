@@ -23,7 +23,7 @@ def str_to_int(utt, newline=True):
 			arr.append(1)
 		else:
 			arr.append(ord(c)+3)
-			
+
 	if newline:
 		return arr.append(2)
 	return arr
@@ -85,9 +85,12 @@ def main(args):
 		obj_real = {}
 		obj_fake = {}
 		context = []
+		print(convo)
 		if utt_num < 2:
+			print('1')
 			continue
 		elif utt_num < args.context-1:
+			print('2')
 			obj_real['context_size'] = utt_num-1
 			obj_fake['context_size'] = utt_num-1
 			for i in range(0, utt_num-1):
@@ -97,7 +100,7 @@ def main(args):
 			obj_real['context_size'] = args.context
 			obj_fake['context_size'] = args.context
 			for i in range(0, args.context):
-				print(convo[i])
+				print('3')
 				context += str_to_int(convo[i])
 			next_utt = str_to_int(convo[args.context+1])
 		fake_utt = buff.poll()
