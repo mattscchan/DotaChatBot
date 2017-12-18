@@ -93,6 +93,8 @@ def main(args):
 			print('2')
 			obj_real['context_size'] = utt_num-1
 			obj_fake['context_size'] = utt_num-1
+			print(i)
+			print(convo[i])
 			for i in range(0, utt_num-1):
 				context += str_to_int(convo[i])
 			next_utt = str_to_int(convo[utt_num])
