@@ -99,7 +99,7 @@ def main(args):
 
 		convo += 1
 
-		if convos % 100000 == 0:
+		if convos % 10000 == 0:
 			with open(json_file, 'a', encoding='utf-8') as f:
 				for obj in json_objs:
 					f.write(json.dumps(obj))
