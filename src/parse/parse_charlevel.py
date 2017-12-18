@@ -67,10 +67,10 @@ def main(args):
 		for utterance in conversation:
 			if utterance.text == None:
 				buff.update('π')
-				utterance.text = 'π'
+				convo.append('')
 			else:
 				buff.update(utterance.text)
-			convo.append(utterance.text)
+				convo.append(utterance.text)
 			utt_num += 1
 
 		obj_real = {}
