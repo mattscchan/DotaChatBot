@@ -5,6 +5,7 @@ import numpy as np
 import json
 import collections
 import random
+import re
 
 # Note that the char mappings are just ASCII value of char minus the lowest value (space) = 2
 # 0 is the padding value, 1 is the UNK token and 2 is newline
