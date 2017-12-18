@@ -36,7 +36,9 @@ class SequenceBuff:
 
 	def update(self, utterance):
 		# replace
-		if self.capacity < self.buffersize:
+		if self.capacity < 2:
+			self.internalMem[self.capacity] = utterance
+		elif self.capacity < self.buffersize:
 			index = random.randint(0, self.capacity-1)
 			self.internalMem[index] = utterance
 		# add
