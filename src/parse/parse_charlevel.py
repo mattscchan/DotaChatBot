@@ -12,8 +12,10 @@ def main(args):
 				chars.append(list('UNK'))
 			else:
 				chars.append(list(utterance.text))
-		chars = [ord(c)-32 for c in chars]
-		break	
+		for c in chars:
+			print(type(c))
+			print(ord(c)-32)	
+		break
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
