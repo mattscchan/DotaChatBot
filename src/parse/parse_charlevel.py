@@ -16,9 +16,18 @@ random.seed(RAND_SEED)
 np.random.seed(RAND_SEED)
 
 def str_to_int(utt, newline=True):
+	arr = []
+
+	for c in list(utt):
+		if c == 'π':
+			arr.append(1)
+		else:
+			arr.append(ord(c)+3)
+			
 	if newline:
-		return [ord(c)+3 for c in list(utt)].append(2)
-	return [ord(c)+3 for c in list(utt)]
+		return arr.append(2)
+	return arr
+
 
 class SequenceBuff:
 
@@ -67,7 +76,7 @@ def main(args):
 		for utterance in conversation:
 			if utterance.text == None:
 				buff.update('π')
-				convo.append('')
+				convo.append('π')
 			else:
 				buff.update(utterance.text)
 				convo.append(utterance.text)
