@@ -54,7 +54,7 @@ def main(args):
 
 	buff = SequenceBuff(args.buffersize)
 	json_objs = []
-	convos = 0
+	convo_num = 0
 
 	for convo in xml_root:
 		utt_num = 0
@@ -97,9 +97,9 @@ def main(args):
 		json_objs.append(obj_real)
 		json_objs.append(obj_fake)
 
-		convo += 1
+		convo_num += 1
 
-		if convos % 10000 == 0:
+		if convo_num % 10000 == 0:
 			with open(json_file, 'a', encoding='utf-8') as f:
 				for obj in json_objs:
 					f.write(json.dumps(obj))
