@@ -63,7 +63,7 @@ def main(args):
 	for conversation in xml_root:
 		utt_num = 0
 
-		conv = []
+		convo = []
 		for utterance in conversation:
 			if utterance.text == None:
 				buff.update('π')
