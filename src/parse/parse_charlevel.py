@@ -101,7 +101,7 @@ def main(args):
 			obj_fake['context_size'] = args.context
 			for i in range(0, args.context):
 				context += str_to_int(convo[i])
-			next_utt = str_to_int(convo[args.context+1])
+			next_utt = str_to_int(convo[args.context])
 		fake_utt = buff.poll()
 
 		obj_real['next_utt'] = next_utt
