@@ -124,6 +124,7 @@ def main(args):
 				for obj in json_objs:
 					f.write(json.dumps(obj))
 					f.write('\n')
+				del json_objs[:]
 
 
 if __name__ == '__main__':
