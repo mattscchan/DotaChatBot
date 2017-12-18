@@ -112,8 +112,8 @@ def main(args):
 		obj_fake['next_utt'] = fake_utt
 		obj_fake['label'] = 1 
 		
-		print(obj_real['context'])
-		print(obj_real['next_utt'])
+		# print(obj_real['context'])
+		# print(obj_real['next_utt'])
 
 		json_objs.append(obj_real)
 		json_objs.append(obj_fake)
