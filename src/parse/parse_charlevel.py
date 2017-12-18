@@ -56,11 +56,11 @@ def main(args):
 	json_objs = []
 	convo_num = 0
 
-	for convo in xml_root:
+	for conversation in xml_root:
 		utt_num = 0
 
-		convo = []
-		for utterance in convo:
+		conv = []
+		for utterance in conversation:
 			if utterance.text == None:
 				buff.update('π')
 				utterance.text = 'π'
