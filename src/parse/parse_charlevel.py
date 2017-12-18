@@ -89,7 +89,7 @@ def main(args):
 		if utt_num < 2:
 			print('1')
 			continue
-		elif utt_num < args.context-1:
+		elif utt_num < args.context+1:
 			print('2')
 			obj_real['context_size'] = utt_num-1
 			obj_fake['context_size'] = utt_num-1
@@ -101,6 +101,8 @@ def main(args):
 			obj_fake['context_size'] = args.context
 			for i in range(0, args.context):
 				print('3')
+				print(i)
+				print(convo[i])
 				context += str_to_int(convo[i])
 			next_utt = str_to_int(convo[args.context+1])
 		fake_utt = buff.poll()
