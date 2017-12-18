@@ -94,7 +94,7 @@ def main(args):
 			obj_fake['context_size'] = utt_num-1
 			for i in range(0, utt_num-1):
 				context += str_to_int(convo[i])
-				print(context)
+				
 			next_utt = str_to_int(convo[utt_num-1])
 		else:
 			obj_real['context_size'] = args.context
@@ -112,14 +112,12 @@ def main(args):
 		obj_fake['next_utt'] = fake_utt
 		obj_fake['label'] = 1 
 		
-		# print(obj_real['context'])
-		# print(obj_real['next_utt'])
 
 		json_objs.append(obj_real)
 		json_objs.append(obj_fake)
 
 		convo_num += 1
-		break
+		
 		if convo_num % 10000 == 0:
 			print(convo_num)
 			with open(json_file, 'a', encoding='utf-8') as f:
