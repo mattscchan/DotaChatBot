@@ -12,7 +12,7 @@ import random
 # FOR SCIENCE
 RAND_SEED = int(0xCAFEBABE)
 random.seed(RAND_SEED)
-numpy.random.seed(RAND_SEED)
+np.random.seed(RAND_SEED)
 
 def str_to_int(utt, newline=True):
 	if newline:
