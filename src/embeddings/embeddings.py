@@ -20,16 +20,15 @@ def main(args):
 				word_counts.update(words_list)
 		print(len(word_counts))
 		
-		freq = []
 		unk_count = 0
 		for el in word_counts:
-			if word_counts[el] < 2:
+			if word_counts[el] < 100:
 				unk_count += 1
 			else:
 				dictionary[el] = len(dictionary)
 		word_counts['unk'] += unk_count
 		print('UNK: ', word_counts['unk'])
-		print(len(freq))
+		print(len(dictionary))
 
 		index_dictionary = dict(zip(dictionary.values(), dictionary.keys()))
 
@@ -37,7 +36,6 @@ def main(args):
 			for index in range(0, len(index_dictionary)):
 				f2.write(index_dictionary[index])
 				f2.write('\n')
-		
 
 
 if __name__ == '__main__':
