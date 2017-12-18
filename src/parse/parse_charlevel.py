@@ -28,7 +28,7 @@ class SequenceBuff:
 		self.internalMem = []
 		
 	def poll(self):
-		index = random.randint(0, self.capacity)
+		index = random.randint(0, self.capacity-1)
 		# make sure to shuffle the buffer
 		if self.capacity < self.buffersize:
 			np.random.shuffle(self.internalMem)
@@ -37,7 +37,7 @@ class SequenceBuff:
 	def update(self, utterance):
 		# replace
 		if self.capacity < self.buffersize:
-			index = random.randint(0, self.capacity)
+			index = random.randint(0, self.capacity-1)
 			self.internalMem[index] = utterance
 		# add
 		else:
@@ -100,6 +100,7 @@ def main(args):
 		convo_num += 1
 
 		if convo_num % 10000 == 0:
+			print(convo_num)
 			with open(json_file, 'a', encoding='utf-8') as f:
 				for obj in json_objs:
 					f.write(json.dumps(obj))
