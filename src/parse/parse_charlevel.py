@@ -33,7 +33,7 @@ class SequenceBuff:
 			np.random.shuffle(self.internalMem)
 		return str_to_int(self.internalMem[index])
 
-	def update(self, utterance)
+	def update(self, utterance):
 		# replace
 		if self.capacity < self.buffersize:
 			index = random.randint(0, self.capacity)
