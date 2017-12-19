@@ -1,6 +1,12 @@
 import tensorflow as tf
 import argparse
+import random
 import re
+import numpy as np
+
+RAND_SEED = int(0xCAFEBABE)
+np.random.seed(RAND_SEED)
+random.seed(RAND_SEED)
 
 def load_table(vectorfile):
 	values = []
@@ -37,13 +43,25 @@ def load_table(vectorfile):
 
 def parse_JSON(example):
     parsed_ex = tf.decode_json_example(example)
-    return parsed_ex['chat']
+    obj_ex = tf.parse_single_example(parsed_ex,
+    	{
+    	"chat": tf.VarLenFeature(tf.int64)
+    	})
+    return obj_ex['chat']
 
-def create_dataset(filenames, parse_function, table, num_parallel_calls=1, batch_size=32,  shuffle_buffer=10000, num_epochs=1):
+def generate_example(chat, context):
+	target = random.randint(0, len(chat))	
+	context = random.randint(max(target-context, 0), min(target+context, len(chat)-1))
+	return chat[target], chat[context]
+
+
+def create_dataset(filenames, parse_function, table, context, num_parallel_calls=1, batch_size=32,  shuffle_buffer=10000, num_epochs=1):
 
     dataset = tf.data.TextLineDataset(filenames)
     dataset = dataset.map(parse_function, num_parallel_calls=num_parallel_calls)
     dataset = dataset.map(lambda x: table.lookup(x), num_parallel_calls=num_parallel_calls)
+    dataset = dataset.map(lambda x, context: tuple(tf.py_func(generate_example, [x, context], [tf.int32, tf.int32]
+    										)))
 
     if num_epochs < 0:
         dataset = dataset.repeat()
@@ -57,6 +75,7 @@ def create_dataset(filenames, parse_function, table, num_parallel_calls=1, batch
     next_element = iterator.get_next()
 
     return next_element, iterator
+
 
 def main(args):
 	values = load_table(args.vectors)
@@ -73,9 +92,6 @@ def main(args):
 
 		el = sess.run(next_element)
 		print(el)
-
-
-
 
 
 if __name__ == '__main__':

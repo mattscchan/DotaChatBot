@@ -16,7 +16,7 @@ def main(args):
 	total_tokens = np.int64(0)
 	unique_tokens = np.int64(0)
 	
-	with open(args.filename, 'r') as f:
+	with open(args.filename, 'r', encoding='utf-8') as f:
 		for line in f:
 			obj = json.loads(line)
 			chat = obj['chat']
@@ -44,22 +44,22 @@ def main(args):
 		
 		rev_dict = dict(zip(dictionary.values(), dictionary.keys()))
 
-		with open('./data/50k_vocab.txt', 'w') as f2:
+		with open('./data/50k_vocab.txt', 'w', encoding='utf-8') as f2:
 			for index in range(0, 50000):
 				f2.write(rev_dict[index])
 				f2.write('\n')
 
-		with open('./data/100k_vocab.txt', 'w') as f2:
+		with open('./data/100k_vocab.txt', 'w', encoding='utf-8') as f2:
 			for index in range(0, 100000):
 				f2.write(rev_dict[index])
 				f2.write('\n')
 
-		with open('./data/250k_vocab.txt', 'w') as f2:
+		with open('./data/250k_vocab.txt', 'w', encoding='utf-8') as f2:
 			for index in range(0, 250000):
 				f2.write(rev_dict[index])
 				f2.write('\n')
 
-		with open('./data/500k_vocab.txt', 'w') as f2:
+		with open('./data/500k_vocab.txt', 'w', encoding='utf-8') as f2:
 			for index in range(0, 500000):
 				f2.write(rev_dict[index])
 				f2.write('\n')
@@ -71,7 +71,7 @@ def main(args):
 		stats.append(total_tokens)
 		stats.append(total_tokens)
 
-		with open('./data/corpus_chars.txt', 'w') as f2:
+		with open('./data/corpus_chars.txt', 'w', encoding='utf-8') as f2:
 			for el in stats:
 				print(el)
 				f2.write(el)
