@@ -93,7 +93,7 @@ def main(args):
 	
 	filenames = tf.placeholder(tf.string, shape=[None])
 
-	next_element, iterator = create_dataset(filenames, parse_JSON, table, num_parallel_calls=4)
+	next_element, iterator = create_dataset(filenames, parse_JSON, table, args.context, num_parallel_calls=4)
 
 	with tf.Session() as sess:
 		sess.run(iterator.initializer, feed_dict={filenames: [args.data]})
@@ -108,5 +108,6 @@ if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
 	parser.add_argument('vectors')
 	parser.add_argument('data')
+	parser.add_argument('context', type=int)
 	args = parser.parse_args()
 	main(args)
