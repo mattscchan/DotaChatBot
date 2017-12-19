@@ -14,7 +14,17 @@ def load_table(vectorfile):
 		index = 0
 		for line in f:
 			line = re.sub(r'\n', '', line)
-			values.append(index)
+			# line = re.sub(r'1', 'one', line)
+			# line = re.sub(r'2', 'two', line)
+			# line = re.sub(r'3', 'three', line)
+			# line = re.sub(r'4', 'four', line)
+			# line = re.sub(r'5', 'five', line)
+			# line = re.sub(r'6', 'six', line)
+			# line = re.sub(r'7', 'seven', line)
+			# line = re.sub(r'8', 'eight', line)
+			# line = re.sub(r'9', 'nine', line)
+			# line = re.sub(r'0', 'zero', line)
+			values.append(line)
 	return values
 
 # def convert_words_to_index(words, dictionary):
