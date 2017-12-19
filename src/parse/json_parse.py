@@ -59,8 +59,14 @@ class SequenceBuff:
 
 def main(args):
 	buff = SequenceBuff(args.buffersize)
+	write_arr = []
+	count = 0
+	train_file = 'train.json'
+	valid_file = 'valid.json'
+	test_file = 'test.json'
 
 	with open(args.filename, 'r', encoding='utf-8') as raw:
+
 		for line in raw:
 			obj = json.loads(line)
 			chat = obj['chat']
@@ -92,10 +98,70 @@ def main(args):
 
 			fake_utt = buff.poll()
 			
-			obj_real = {'context': context, 'next_utt': next_utt, 'label': 0, 'chat_len': len(chat)}
+			obj_real = {'context': context, 'next_utt': next_utt, 'label': 0}
 			obj_fake = {'context': context, 'next_utt': fake_utt, 'label': 1}
 			
-			print(obj_real)
+			count += 1
+
+			if count % 100000 == 0:
+				print('We at', count)
+
+				np.random.shuffle(write_arr)
+				total = len(write_arr)
+				train_size = int(total*0.8)
+				valid_size = int((total - train_size)/2)
+				test_size = int(total - train_size - valid_size)
+
+				train_arr = write_arr[:train_size]
+				valid_arr = write_arr[train_size:train_size+valid_size]
+				test_arr = write_arr[train_size+valid_size:]
+
+				# Train file
+				with open(train_file, 'a', encoding='utf-8') as train:
+					for el in train_arr:
+						train.write(json.dumps(el))
+						
+				# Valid file
+				with open(valid_file, 'a', encoding='utf-8') as valid:
+					for el in valid_arr:
+						valid.write(json.dumps(el))
+
+				# Test file
+				with open(test_file, 'a', encoding='utf-8') as test:
+					for el in test_arr:
+						test.write(json.dumps(el))
+
+				del write_arr[:]
+				del train_arr
+				del valid_arr
+				del test_arr
+
+	print('Last write!', count)
+	np.random.shuffle(write_arr)
+	total = len(write_arr)
+	train_size = int(total*0.8)
+	valid_size = int((total - train_size)/2)
+	test_size = int(total - train_size - valid_size)
+
+	train_arr = write_arr[:train_size]
+	valid_arr = write_arr[train_size:train_size+valid_size]
+	test_arr = write_arr[train_size+valid_size:]
+
+	# Train file
+	with open(train_file, 'a', encoding='utf-8') as train:
+		for el in train_arr:
+			train.write(json.dumps(el))
+			
+	# Valid file
+	with open(valid_file, 'a', encoding='utf-8') as valid:
+		for el in valid_arr:
+			valid.write(json.dumps(el))
+
+	# Test file
+	with open(test_file, 'a', encoding='utf-8') as test:
+		for el in test_arr:
+			test.write(json.dumps(el))
+
 
 
 if __name__ == '__main__':
