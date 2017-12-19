@@ -83,17 +83,21 @@ def main(args):
 				next_utt = str_to_int(chat[start + args.context])
 			# need to shrink context
 			else:
-				for index in range(0, len(chat)-1):
-					context += str_to_int(chat[index])
-				print(len(chat))
-				print(len(chat)-1)
-				print(chat)
-				next_utt = str_to_int(chat[len(chat)-1])
+				if len(chat) > 2:
+					for index in range(0, len(chat)-1):
+						context += str_to_int(chat[index])
+					next_utt = str_to_int(chat[len(chat)-1])
+				else:
+					a = True
+					print(a)
+					continue
 
 			fake_utt = buff.poll()
-
+			print(a)
 			obj_real = {'context': context, 'next_utt': next_utt, 'label': 0}
 			obj_fake = {'context': context, 'next_utt': fake_utt, 'label': 1}
+			if a:
+				break
 
 
 if __name__ == '__main__':
