@@ -120,9 +120,9 @@ def main(args):
 
 		convo_num += 1
 		
-		if convo_num % 5000 == 0:
+		if convo_num % 10000 == 0:
 			print(convo_num)
-			if convo_num < 45000:
+			if convo_num < 450000:
 				with open(json_file, 'a', encoding='utf-8') as f:
 					for obj in json_objs:
 						f.write(json.dumps(obj))
