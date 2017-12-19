@@ -220,8 +220,8 @@ def main(args):
     filenames = tf.placeholder(
     embeddings = tf.placeholder(tf.float32, shape=(const.vocab_size, const.embedding_size, name='embeddings'))
     x_context = tf.placehoder(tf.int32, shape=(None, hyper.max_timesteps, const.embedding_size), name='x_context'))
-    x_response = tf.placeholder(tf.int32, shape=(None, hyper.max_timesteps, const.embedding_size), name='x_response'))
-    y = tf.placeholder(tf.int32, shape=(None, const.num_classes), name='y'))
+    x_response = tf.placeholder(tf.int32, shape=(None, hyper.max_timesteps, const.embedding_size), name='x_response')
+    y = tf.placeholder(tf.int32, shape=(None, const.num_classes), name='y')
 
     # Formatting inputs
     x_c_emb = tf.nn.embedding_lookup(embeddings, x_context, name='x_c_emb')
@@ -261,8 +261,8 @@ def main(args):
             global_step=current_epoch)
 
     train(hyper, const, 
-            filenames_train='data/train.tfrecords',
-            filenames_valid='data/valid.tfrecords',
+            filenames_train='./data/mini_train.json',
+            filenames_valid='./data/mini_valid.json',
             training_op=training, 
             accuracy_op=accuracy, 
             save_path=args.save_directory,
