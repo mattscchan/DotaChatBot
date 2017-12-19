@@ -85,6 +85,9 @@ def main(args):
 			else:
 				for index in range(0, len(chat)-1):
 					context += str_to_int(chat[index])
+				print(len(chat))
+				print(len(chat)-1)
+				print(chat)
 				next_utt = str_to_int(chat[len(chat)-1])
 
 			fake_utt = buff.poll()
