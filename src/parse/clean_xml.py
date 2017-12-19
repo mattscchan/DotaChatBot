@@ -4,7 +4,7 @@ import re
 def main(args):
 	clean_file = []
 	with open(args.filename+'_clean.xml', 'a') as f2:
-		print('<data>')
+		f2.write('<data>')
 
 	with open(args.filename + '.xml', 'r') as f:
 		count = 0
@@ -24,7 +24,7 @@ def main(args):
 		with open(args.filename + '_clean.xml', 'a') as f2:
 			for line in clean_file:
 				f2.write(line)
-			print('</data>')
+			f2.write('</data>')
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
