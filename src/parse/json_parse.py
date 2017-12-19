@@ -63,6 +63,7 @@ def main(args):
 	with open(args.filename, 'r', encoding='utf-8') as raw:
 		for line in raw:
 			obj = json.dumps(line)
+			print(obj)
 			chat = obj['chat']
 
 			for utt in chat:
@@ -91,7 +92,7 @@ def main(args):
 
 			obj_real = {'context': context, 'next_utt': next_utt, 'label': 0}
 			obj_fake = {'context': context, 'next_utt': fake_utt, 'label': 1}
-			
+
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
