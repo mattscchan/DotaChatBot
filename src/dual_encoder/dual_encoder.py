@@ -129,6 +129,9 @@ def create_dual_encoder(context, response, cell, state, weights, bias, initializ
         return tf.add(similary, bias, name='logits')
 
 def create_performance(labels, logits, optimizer, lr, decay_rate, decay_steps, global_step):
+    '''
+    The TensorFlow training and accuracy operation
+    '''
     with tf.name_scope("loss"):
         cross = tf.nn.softmax_cross_entropy_with_logits(labels=y_onehot, logits=logits)
         loss = tf.reduce_mean(cross, name="loss")
@@ -272,11 +275,14 @@ def main(args):
 
 
 def __main__():
-    parser = argparse.ArgumentParser(description='Dual RNN encoder model for next utterance classification.')
-    parser.add_argument('param_line', type=int, default=-1)
+    parser = argparse.ArgumentParser(
+            description='Dual RNN encoder model for next utterance classification.')
     parser.add_argument('save_directory', help='Where to save/load the training model')
+    parser.add_argument('-p', '--param_line', type=int, default=-1, help='Line in params.txt')
     parser.add_argument('-n', '--num_epochs', type=int, default=1)
-    parser.add_argument('-s', '--saved', default=None, help='Whether to load a saved model')
-    #parser.add_argument('-t', '--tinysample', action='store_true', default=False)
+    parser.add_argument('-s', '--saved', 
+            action='store_true', 
+            default=False, 
+            help='Whether to load a saved model')
     args = parser.parse_args()
     main(args)
