@@ -39,7 +39,7 @@ def main(args):
 		# choosing 50k, 100k, 250k, 500k
 		index = 0
 		for word in top_n:
-			dictionary[word] = index
+			dictionary[word[0]] = index
 			index += 1
 		
 		rev_dict = dict(zip(dictionary.values(), dictionary.keys()))
