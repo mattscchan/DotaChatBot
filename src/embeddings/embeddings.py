@@ -44,22 +44,22 @@ def main(args):
 		
 		rev_dict = dict(zip(dictionary.values(), dictionary.keys()))
 
-		with open('50k_vocab.txt', 'w') as f2:
+		with open('./data/50k_vocab.txt', 'w') as f2:
 			for index in range(0, 50000):
 				f2.write(rev_dict[index])
 				f2.write('\n')
 
-		with open('100k_vocab.txt', 'w') as f2:
+		with open('./data/100k_vocab.txt', 'w') as f2:
 			for index in range(0, 100000):
 				f2.write(rev_dict[index])
 				f2.write('\n')
 
-		with open('250k_vocab.txt', 'w') as f2:
+		with open('./data/250k_vocab.txt', 'w') as f2:
 			for index in range(0, 250000):
 				f2.write(rev_dict[index])
 				f2.write('\n')
 
-		with open('500k_vocab.txt', 'w') as f2:
+		with open('./data/500k_vocab.txt', 'w') as f2:
 			for index in range(0, 500000):
 				f2.write(rev_dict[index])
 				f2.write('\n')
@@ -71,7 +71,7 @@ def main(args):
 		stats.append(total_tokens)
 		stats.append(total_tokens)
 
-		with open('corpus_chars.txt', 'w') as f2:
+		with open('./data/corpus_chars.txt', 'w') as f2:
 			for el in stats:
 				print(el)
 				f2.write(el)
