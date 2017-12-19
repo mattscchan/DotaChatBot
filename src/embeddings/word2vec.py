@@ -57,6 +57,7 @@ def parse_JSON(example):
     	{
     	"chat": tf.VarLenFeature(tf.int64)
     	})
+    print(obj_ex['chat'].indices)
     return obj_ex['chat']
 
 def generate_example(chat, context):
