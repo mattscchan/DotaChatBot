@@ -57,8 +57,8 @@ def parse_JSON(example):
     	{
     	"chat": tf.VarLenFeature(tf.int64)
     	})
-    print(obj_ex['chat'].indices)
-    return obj_ex['chat']
+    
+    return tf.sparse_tensor_to_dense(obj_ex['chat'])
 
 def generate_example(chat, context):
 	target = random.randint(0, len(chat))	
