@@ -77,7 +77,7 @@ def main(args):
 				else:
 					start = 0
 
-				for index in range(start, args.context):
+				for index in range(0, start):
 					context += str_to_int(chat[index])
 				print('CONTEXT', context)
 				next_utt = str_to_int(chat[start + args.context])
