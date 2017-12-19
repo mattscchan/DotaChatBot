@@ -49,7 +49,7 @@ def parse_JSON(example):
 
     return parsed_ex['context'], parsed_ex['next_utt'], parsed_ex['label']
 
-def create_dataset(filenames, parse_function, num_parallel_calls=1, batch_size=32,  shuffle_buffer=10000, num_epochs=-1):
+def create_dataset(filenames, parse_function, num_parallel_calls=1, batch_size=32,  shuffle_buffer=10000, num_epochs=1):
 
     dataset = tf.data.TextLineDataset(filenames)
     dataset = dataset.map(parse_function, num_parallel_calls=num_parallel_calls)
