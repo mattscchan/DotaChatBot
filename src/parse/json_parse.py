@@ -62,8 +62,7 @@ def main(args):
 
 	with open(args.filename, 'r', encoding='utf-8') as raw:
 		for line in raw:
-			obj = json.dumps(line)
-			print(obj)
+			obj = json.loads(line)
 			chat = obj['chat']
 
 			for utt in chat:
