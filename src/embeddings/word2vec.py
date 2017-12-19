@@ -55,7 +55,7 @@ def parse_JSON(example):
     parsed_ex = tf.decode_json_example(example)
     obj_ex = tf.parse_single_example(parsed_ex,
     	{
-    	"chat": tf.VarLenFeature(tf.int64)
+    	"chat": tf.VarLenFeature(tf.string)
     	})
     
     return tf.sparse_tensor_to_dense(obj_ex['chat'])
