@@ -71,8 +71,7 @@ def create_dataset(filenames, parse_function, table, context, num_parallel_calls
     dataset = tf.data.TextLineDataset(filenames)
     dataset = dataset.map(parse_function, num_parallel_calls=num_parallel_calls)
     dataset = dataset.map(lambda x: table.lookup(x), num_parallel_calls=num_parallel_calls)
-    dataset = dataset.map(lambda x, context: tuple(tf.py_func(generate_example, [x, context], [tf.int32, tf.int32]
-    										)))
+    dataset = dataset.map(lambda x, context: tuple(tf.py_func(generate_example, [x, context], [tf.int32, tf.int32])))
 
     if num_epochs < 0:
         dataset = dataset.repeat()
