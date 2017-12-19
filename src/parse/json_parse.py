@@ -88,16 +88,14 @@ def main(args):
 						context += str_to_int(chat[index])
 					next_utt = str_to_int(chat[len(chat)-1])
 				else:
-					a = True
-					print(a)
 					continue
 
 			fake_utt = buff.poll()
-			print(a)
+			
 			obj_real = {'context': context, 'next_utt': next_utt, 'label': 0}
 			obj_fake = {'context': context, 'next_utt': fake_utt, 'label': 1}
-			if a:
-				break
+			
+			print(obj_real)
 
 
 if __name__ == '__main__':
