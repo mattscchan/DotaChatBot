@@ -56,7 +56,7 @@ def parse_JSON(example):
     shape = {
                 "chat": tf.VarLenFeature([tf.string])
             }
-    obj_ex = tf.parse_single_example(parsed_ex,)
+    obj_ex = tf.parse_single_example(parsed_ex, shape)
     
     return tf.sparse_tensor_to_dense(obj_ex['chat'], default_value='π')
 
