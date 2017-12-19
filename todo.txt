@@ -1,0 +1,7 @@
+# Data Preprocessing
+tokenize
+other cleaning (remove non-ascii, punctuation)
+keep a context of 100 previous dialogues during parsing and generate a false response from random sampling of those
+keep a dictionary of words and their counts saved to file
+pass a 2nd time through the data and generate false response with a random sampling of from the distribution of words with length sampled with a normal distribution over the number of words per utterance
+train embedding
