@@ -92,7 +92,7 @@ def main(args):
 
 			fake_utt = buff.poll()
 			
-			obj_real = {'context': context, 'next_utt': next_utt, 'label': 0}
+			obj_real = {'context': context, 'next_utt': next_utt, 'label': 0, 'chat_len': len(chat)}
 			obj_fake = {'context': context, 'next_utt': fake_utt, 'label': 1}
 			
 			print(obj_real)
