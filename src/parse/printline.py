@@ -3,7 +3,7 @@ import json
 
 def main(args):
 	with open(args.filename, 'r') as f:
-		count = 1
+		count = 0
 		for line in f:
 			if count == args.line:
 				print(line)
