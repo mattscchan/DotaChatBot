@@ -60,7 +60,6 @@ def create_params(params_file, number=-1):
     params.extend(float(v) for v in line[3:])
     return Hyper(params[:-3]), Const(params[-1:])
 
-
 ## Architecture ##
 def create_rnn(cell_type, hidden_size, dropout_prob=None, num_layers=1, batch_size=1):
     '''
@@ -151,15 +150,74 @@ def create_performance(labels, logits, optimizer, lr, decay_rate, decay_steps, g
     
     return training, accuracy
 
-def train(epochs, batch_size):
+def train(h, c, filenames_train, filenames_valid, training_op, accuracy_op, save_path, saved, epochs=1, batch_size=32):
+    saver = tf.train.Saver()
+
+    with tf.Session() as sess:
+        with open('training.log', 'a') as log:
+            time_start = time.time()
+            if saved:
+                saver.restore(sess, save_path + '.ckpt')
+            else
+                sess.run(tf.global_variables_initializer())
+            
+            element_train, iterator_train = create_dataset(filenames_train, 
+                    parse_function=parse_function, 
+                    batch_size=batch_size, 
+                    num_epochs=epochs)
+            element_valid, iterator_valid = create_dataset(filenames_valid, 
+                    parse_function=parse_function, 
+                    batch_size=batch_size, 
+                    num_epochs=epochs)
+            
+            for epoch in range(epochs):
+                sess.run(iterator.initalizer, feed_dict={filenames: filenames_train})
+                while True:
+                    try:
+                        batch_train = sess.run(element_train)
+                    except tf.errors.OutOfRangeError:
+                        break # Catch error when generator runs out after each epoch
+                    else:
+                        # Training the model
+                        sess.run(training_op, feed_dict={
+                            x_context=batch[0],
+                            x_response=batch[1],
+                            y=batch[2]})
+
+                        # Get trainig accuracy
+                        accuracy_train = accuracy_op.eval(session=sess, feed_dict={
+                            x_context=batch[0],
+                            x_response=batch[1],
+                            y=batch[2]})
+                        print('Training accuracy: %2.2f' % accuracy_train*100, end='\r', flush=True)
+                # Validating after every epoch
+                print('Training accuracy: %2.2f' % accuracy_train*100)
+                sess.run(iterator.initalizer, feed_dict={filenames: filenames_valid})
+                while True:
+                    try:
+                        batch_valid = sess.run(element_valid)
+                    except tf.errors.OutOfRangeError:
+                        break
+                    except:
+                        accuracy_valid = accuracy_op.eval(session=sess, feed_dict={
+                            x_context=batch[0],
+                            x_response=batch[1],
+                            y=batch[2]})
+                print('Validating accuracy: %2.2f' % accuracy_valid*100)
+                saved_at = saver.save(sess, save_path + str(epoch) + '.ckpt')
+                log.write(str(c) + ',' + str(h) + 'epoch:' + str(epoch))
+                log.write('t_acc:' + str(accuracy_train) + 'v_acc:' + str(accuracy_valid) + '\n')
+
+def get_saved_path(save_path):
     pass
-    
+
 def main(args):
     # Load parameters from file
-    hyper, const = create_params(args.params, args.linenumber)
+    hyper, const = create_params('params.txt', args.param_line)
     current_epoch= tf.Variable(0, trainable=False)
 
     # Inputs
+    filenames = tf.placeholder(
     embeddings = tf.placeholder(tf.float32, shape=(const.vocab_size, const.embedding_size, name='embeddings'))
     x_context = tf.placehoder(tf.int32, shape=(None, hyper.max_timesteps, const.embedding_size), name='x_context'))
     x_response = tf.placeholder(tf.int32, shape=(None, hyper.max_timesteps, const.embedding_size), name='x_response'))
@@ -202,10 +260,23 @@ def main(args):
             decay_steps=hyper.decay_steps, 
             global_step=current_epoch)
 
-    results = train()
+    train(hyper, const, 
+            filenames_train='data/train.tfrecords',
+            filenames_valid='data/valid.tfrecords',
+            training_op=training, 
+            accuracy_op=accuracy, 
+            save_path=args.save_directory,
+            saved=args.saved, 
+            epochs=args.num_epochs,
+            batch_size=hyper.batch_size)
+
 
 def __main__():
     parser = argparse.ArgumentParser(description='Dual RNN encoder model for next utterance classification.')
-    parser.add_argument('-s', '--saved', action='store_true', default=False)
+    parser.add_argument('param_line', type=int, default=-1)
+    parser.add_argument('save_directory', help='Where to save/load the training model')
+    parser.add_argument('-n', '--num_epochs', type=int, default=1)
+    parser.add_argument('-s', '--saved', default=None, help='Whether to load a saved model')
+    #parser.add_argument('-t', '--tinysample', action='store_true', default=False)
     args = parser.parse_args()
     main(args)

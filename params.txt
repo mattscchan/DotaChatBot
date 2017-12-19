@@ -1,0 +1,1 @@
+tf.truncated_normal_initializer, tf.train.AdamOptimizer, lstm, 1000, 100, 1, 512, 0.5, 0.0001, 0, 0, 16, 69, 2
