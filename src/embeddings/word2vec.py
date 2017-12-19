@@ -60,18 +60,19 @@ def parse_JSON(example):
     
     return tf.sparse_tensor_to_dense(obj_ex['chat'], default_value='π')
 
-def generate_example(chat, context):
-	target = random.randint(0, len(chat))	
-	context = random.randint(max(target-context, 0), min(target+context, len(chat)-1))
-	return chat[target], chat[context]
-
 
 def create_dataset(filenames, parse_function, table, context, num_parallel_calls=1, batch_size=32,  shuffle_buffer=10000, num_epochs=1):
 
+    def generate_example(chat):
+        target = random.randint(0, len(chat))   
+        context = random.randint(max(target-context, 0), min(target+context, len(chat)-1))
+        return chat[target], chat[context]
+    
     dataset = tf.data.TextLineDataset(filenames)
     dataset = dataset.map(parse_function, num_parallel_calls=num_parallel_calls)
     dataset = dataset.map(lambda x: table.lookup(x), num_parallel_calls=num_parallel_calls)
-    dataset = dataset.map(lambda x, context: tuple(tf.py_func(generate_example, [x, context], [tf.int32, tf.int32])))
+    dataset = dataset.map(lambda x: tuple(tf.py_func(
+                                                    generate_example, [x], [tf.int64, tf.int64])))
 
     if num_epochs < 0:
         dataset = dataset.repeat()
