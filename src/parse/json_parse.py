@@ -79,7 +79,7 @@ def main(args):
 
 				for index in range(start, args.context):
 					context += str_to_int(chat[index])
-
+				print('CONTEXT', context)
 				next_utt = str_to_int(chat[start + args.context])
 			# need to shrink context
 			else:
