@@ -6,6 +6,7 @@ import json
 import collections
 import random
 import re
+import os
 
 # Note that the char mappings are just ASCII value of char minus the lowest value (space) = 2
 # 0 is the padding value, 1 is the UNK token and 2 is newline
@@ -60,8 +61,8 @@ class SequenceBuff:
 
 def main(args):
 	tree = ET.parse(args.filename)
-	json_file = 'mini_train.json'
-	valid_file = 'mini_valid.json'
+	json_file = './data/mini_train.json'
+	valid_file = './data/mini_valid.json'
 	xml_root = tree.getroot()
 	# max = -1
 	# utt_num = []
@@ -130,8 +131,8 @@ def main(args):
 			else:
 				with open(valid_file, 'a', encoding='utf-8') as f2:
 					for obj in json_objs:
-						f.write(json.dumps(obj))
-						f.write('\n')
+						f2.write(json.dumps(obj))
+						f2.write('\n')
 					del json_objs[:]
 
 
