@@ -6,7 +6,8 @@ import json
 
 def _bytes_feature(value):
     value = [word.encode('utf-8') for word in value]
-    return tf.train.Feature(bytes_list=tf.train.BytesList(value=value))
+    value = ' '.join(value)
+    return tf.train.Feature(bytes_list=tf.train.BytesList(value=[value]))
 
 def _convert(text):
     return tf.train.Example(
