@@ -53,10 +53,10 @@ def load_table(vectorfile):
 
 def parse_JSON(example):
     feature = {
-                "chat": tf.FixedLenFeature([], tf.string)
+                "text": tf.FixedLenFeature([], tf.string)
             }
     obj_ex = tf.parse_single_example(example, feature)
-    return obj_ex['chat']
+    return obj_ex["text"]
     # return tf.sparse_tensor_to_dense(tf.string_split(obj_ex["chat"]), default_value='π')
 
 
