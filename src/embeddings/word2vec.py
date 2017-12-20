@@ -53,7 +53,7 @@ def load_table(vectorfile):
 
 def parse_JSON(example):
     feature = {
-                "text": tf.FixedLenFeature([], tf.string)
+                "text": tf.FixedLenFeature([1], tf.string)
             }
     obj_ex = tf.parse_single_example(example, feature)
     
