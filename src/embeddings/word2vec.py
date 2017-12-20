@@ -54,11 +54,11 @@ def load_table(vectorfile):
 def parse_JSON(example):
     parsed_ex = tf.decode_json_example(example)
     shape = {
-                "chat": tf.VarLenFeature(tf.string)
+                "feature": tf.VarLenFeature(tf.string)
             }
     obj_ex = tf.parse_single_example(parsed_ex, shape)
-    print(obj_ex['chat'])
-    return tf.sparse_tensor_to_dense(obj_ex["chat"], default_value='π')
+    
+    return tf.sparse_tensor_to_dense(obj_ex["feature"], default_value='π')
 
 
 def create_dataset(filenames, parse_function, table, context, num_parallel_calls=1, batch_size=32,  shuffle_buffer=10000, num_epochs=1):
@@ -71,7 +71,7 @@ def create_dataset(filenames, parse_function, table, context, num_parallel_calls
     dataset = tf.data.TextLineDataset(filenames)
     dataset = dataset.map(parse_function, num_parallel_calls=num_parallel_calls)
     dataset = dataset.map(lambda x: table.lookup(x), num_parallel_calls=num_parallel_calls)
-    dataset = dataset.map(lambda x: tuple(tf.py_func(generate_example, [x], [tf.int64, tf.int64])), num_parallel_calls=num_parallel_calls)
+    dataset = dataset.map(lambda x: tuple(tf.py_func(generate_example, x, [tf.int64, tf.int64])), num_parallel_calls=num_parallel_calls)
 
     if num_epochs < 0:
         dataset = dataset.repeat()
