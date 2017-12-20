@@ -8,14 +8,15 @@ from tensorflow.python.keras.models import Sequential, Model, load_model
 from tensorflow.python.keras.layers import Input, Embedding, LSTM, Dense, concatenate
 from tensorflow.python.keras.callbacks import ModelCheckpoint, Callback
 from tensorflow.python.keras.preprocessing.sequence import pad_sequences
-from tensorflow.python.keras import optimizers
+from tensorflow.python.keras import optimizers, initializers
 
 SEED = int('0xCAFEBABE', 16)
 np.random.seed(SEED)
 tf.set_random_seed(SEED)
 
 # HYPERPARAMETERS
-Hyper = namedtuple('Hyper', ['hidden_units', 'lr', 'clipnorm', 'batch_size', 'optimizer'])
+Hyper = namedtuple('Hyper', 
+        ['hidden_units', 'lr', 'clipnorm', 'batch_size', 'optimizer', 'kernel_init', 'recurrent_init'])
 Const = namedtuple('Const', ['embedding_size', 'max_timesteps', 'vocab_size'])
 
 # DATASET
@@ -62,12 +63,16 @@ def model(const, hyper, train, valid, test=None, epochs=1, saved_name=None, save
                             #weights=[],
                             name='Embedding'
                             ))
-        if len(hyper.hidden_units) > 1:
-            for i, units in enumerate(hyper.hidden_units):
-                if i != len(hyper.hidden_units)-1:
-                    encoder.add(LSTM(units, return_sequences=True, name='LSTM'+str(units) + '-' + str(i)))
-        encoder.add(LSTM(units=hyper.hidden_units[-1], name='LSTM'+str(hyper.hidden_units[-1]) + '-' + str(i+1)))
-        encoder.summary()
+        if not hyper.kernel_init:
+            hyper.kernel_init='glorot_uniform'
+        if no hyper.recurrent_init:
+            hyper.recurrent_init='orthogonal'
+        ret_seq=True
+        for i, units in enumerate(hyper.hidden_units):
+            if i == len(hyper.hidden_units)-1:
+                ret_seq = False
+            encoder.add(LSTM(units, return_sequences=ret_seq, 
+                kernel_initializer=hyper.kernel_init, recurrent_initializer=hyper.recurrent_init))
         
         context = Input(shape=(const.max_timesteps,), dtype='int32', name='Context')
         response = Input(shape=(const.max_timesteps,), dtype='int32', name='Response')
@@ -122,11 +127,13 @@ def log_history(train_acc, valid_acc, path, test_acc=None):
 
 def main(args):
     hyper = Hyper(
-        hidden_units=[100, 100],
+        hidden_units=[100],
         lr=0.0001,
         clipnorm=10,
         batch_size=512,
-        optimizer=optimizers.Adam
+        optimizer=optimizers.Adam,
+        kernel_init=initializers.RandomUniform(minval=-0.01, maxval=0.01, seed=SEED),
+        recurrent_init=initializers.Orthogonal(seed=SEED),
     )
     const = Const(
         embedding_size=16,
