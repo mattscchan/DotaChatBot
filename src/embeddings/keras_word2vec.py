@@ -7,6 +7,7 @@ import argparse
 import json
 import tensorflow as tf
 import numpy as np
+import re
 
 SEED = int('0xCAFEBABE', 16)
 np.random.seed(SEED)
@@ -14,34 +15,68 @@ tf.set_random_seed(SEED)
 
 def read_data(datafile, vectorfile):
 	data = []
-	dictionary = {}
 	with open(datafile, 'r', encoding='utf-8') as f:
 		for line in f:
 			obj = json.loads(line)
 			chat = obj["chat"]
-			chat = [utt.split() for utt in chat]
 			data.append(chat)
-
-	with open(vectorfile, 'r', encoding='utf-8') as f:
-		index = 0
-		for line in f:
-			line = re.sub(r'\n', '', line)
-			dictionary[line] = index
-			index += 1
-	rev_dict = dict(zip(dictionary.value(), dictionary.keys()))
-
-	return data, rev_dict
-
-def convert_to_indices(data, rev_dict):
-	converted = []
-	for convo in data:
-		convo = [word[]]
-
+	return data
 
 def main(args):
-	vocab_size = 
-	data, rev_dict = read_data(args.data, args.vectors)
-	indexed_data = convert_to_indices(data, rev_dict)
+	window_size = 3
+	vector_dim = 300
+	epochs = 200000
+
+	vocab_size = re.sub(r'\D', '', args.data)
+	vocab_size = int(vocab_size) * 1000
+
+	data = read_data(args.data)
+	sampling_table = sequence.make_sampling_table(vocab_size)
+
+	word_target = []
+	word_context = []
+
+	for convo in data:
+		couples, labels = skipgrams(convo, vocab_size, window_size=window_size, sampling_table=sampling_table)
+		tmp_target, tmp_context = zip(*couples)
+		word_target += tmp_target
+		word_context += tmp_context
+
+	word_target = np.array(word_target, dtype="int32")
+	word_context = np.array(word_context, dtype="int32")
+
+	input_target = Input((1,))
+	input_context = Input((1,))
+
+	embedding = Embedding(vocab_size, vector_dim, input_length=1, name='embedding')
+	target = embedding(input_target)
+	target = Reshape((vector_dim, 1))(target)
+	context = embedding(input_context)
+	context = Reshape((vector_dim, 1))(context)
+
+	# now perform the dot product operation to get a similarity measure
+	dot_product = merge([target, context], mode='dot', dot_axes=1)
+	dot_product = Reshape((1,))(dot_product)
+	# add the sigmoid output layer
+	output = Dense(1, activation='sigmoid')(dot_product)
+	# create the primary training model
+	model = Model(input=[input_target, input_context], output=output)
+	model.compile(loss='binary_crossentropy', optimizer='rmsprop')
+
+	arr_1 = np.zeros((1,))
+	arr_2 = np.zeros((1,))
+	arr_3 = np.zeros((1,))
+
+	for cnt in range(epochs):
+	    idx = np.random.randint(0, len(labels)-1)
+	    arr_1[0,] = word_target[idx]
+	    arr_2[0,] = word_context[idx]
+	    arr_3[0,] = labels[idx]
+	    loss = model.train_on_batch([arr_1, arr_2], arr_3)
+	    if cnt % 100 == 0:
+	        print("Iteration {}, loss={}".format(cnt, loss))
+	        embed = model.get_layer(name='embedding')
+	        print(embed)
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
