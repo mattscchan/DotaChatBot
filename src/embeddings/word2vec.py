@@ -53,9 +53,9 @@ def load_table(vectorfile):
 
 def parse_JSON(example):
     feature = {
-                "text": tf.FixedLenFeature([1], tf.string)
+                "text": tf.FixedLenFeature([], tf.string)
             }
-    obj_ex = tf.parse_single_example(example, feature)
+    obj_ex = tf.parse_example(example, feature)
     
     return tf.sparse_tensor_to_dense(tf.string_split(obj_ex["text"]), default_value='π')
 
@@ -68,6 +68,7 @@ def create_dataset(filenames, parse_function, table, context, num_parallel_calls
         return chat[target], chat[context]
 
     dataset = tf.data.TFRecordDataset(filenames)
+    dataset = dataset.batch(32)
     dataset = dataset.map(parse_function, num_parallel_calls=num_parallel_calls)
     # dataset = dataset.map(lambda x: print(type(x)) table.lookup(x), num_parallel_calls=num_parallel_calls)
     # dataset = dataset.map(lambda x: tuple(tf.py_func(generate_example, [x], [tf.int64, tf.int64])), num_parallel_calls=num_parallel_calls)
@@ -78,7 +79,6 @@ def create_dataset(filenames, parse_function, table, context, num_parallel_calls
         dataset = dataset.repeat(num_epochs)
 
     dataset = dataset.shuffle(shuffle_buffer)
-    dataset = dataset.batch(32)
     dataset = dataset.prefetch(10000)
     iterator = dataset.make_initializable_iterator()
     next_element = iterator.get_next()
