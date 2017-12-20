@@ -108,6 +108,6 @@ if __name__ == '__main__':
 	parser.add_argument('vectors')
 	parser.add_argument('data')
 	parser.add_argument('context', type=int)
-    parser.add_argument('vocab_size', type=int)
+	parse.add_argument('vocab_size', type=int)
 	args = parser.parse_args()
 	main(args)
