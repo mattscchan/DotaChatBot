@@ -63,7 +63,7 @@ def parse_JSON(example):
 def create_dataset(filenames, parse_function, table, context, vocab_size, num_parallel_calls=1, batch_size=32,  shuffle_buffer=10000, num_epochs=1):
 
     def generate_example(chat):
-        couples, labels = tf.keras.preprocessing.sequence(chat, vocab_size, seed=RAND_SEED)
+        couples, labels = tf.keras.preprocessing.sequence.skipgrams(chat, vocab_size, seed=RAND_SEED)
         return couples, labels
 
     dataset = tf.data.TFRecordDataset(filenames)
