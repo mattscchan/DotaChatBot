@@ -53,7 +53,7 @@ def load_table(vectorfile):
 
 def parse_JSON(example):
     feature = {
-                "chat": tf.FixedLenFeature([], tf.string)
+                "chat": tf.FixedLenFeature([1], tf.string)
             }
     obj_ex = tf.parse_single_example(example, feature)
     
@@ -67,7 +67,7 @@ def create_dataset(filenames, parse_function, table, context, num_parallel_calls
         context = random.randint(max(target-context, 0), min(target+context, len(chat)-1))
         return chat[target], chat[context]
 
-    dataset = tf.data.TextLineDataset(filenames)
+    dataset = tf.data.TFRecordDataset(filenames)
     dataset = dataset.map(parse_function, num_parallel_calls=num_parallel_calls)
     dataset = dataset.map(lambda x: table.lookup(x), num_parallel_calls=num_parallel_calls)
     dataset = dataset.map(lambda x: tuple(tf.py_func(generate_example, [x], [tf.int64, tf.int64])), num_parallel_calls=num_parallel_calls)
