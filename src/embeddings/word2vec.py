@@ -63,15 +63,14 @@ def parse_JSON(example):
 def create_dataset(filenames, parse_function, table, context, vocab_size, num_parallel_calls=1, batch_size=32,  shuffle_buffer=10000, num_epochs=1):
 
     def generate_example(chat):
-        target = random.randint(0, len(chat))   
-        index = random.randint(max(target-context, 0), min(target+context, len(chat)-1))
-        return chat[target], chat[index]
+        couples, labels = tf.keras.preprocessing.sequence(chat, vocab_size, seed=RAND_SEED)
+        return couples, labels
 
     dataset = tf.data.TFRecordDataset(filenames)
     dataset = dataset.batch(32)
     dataset = dataset.map(parse_function, num_parallel_calls=num_parallel_calls)
     dataset = dataset.map(lambda x: table.lookup(x), num_parallel_calls=num_parallel_calls)
-    dataset = dataset.map(lambda x: tf.keras.preprocessing.sequence(x, vocab_size, seed=RAND_SEED), num_parallel_calls=num_parallel_calls)
+    dataset = dataset.map(generate_example, num_parallel_calls=num_parallel_calls)
 
     if num_epochs < 0:
         dataset = dataset.repeat()
@@ -108,6 +107,6 @@ if __name__ == '__main__':
 	parser.add_argument('vectors')
 	parser.add_argument('data')
 	parser.add_argument('context', type=int)
-	parse.add_argument('vocab_size', type=int)
+	parser.add_argument('vocab_size', type=int)
 	args = parser.parse_args()
 	main(args)
