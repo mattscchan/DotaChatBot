@@ -3,10 +3,9 @@ import argparse
 import sys
 import json
 
-reload(sys)  
-sys.setdefaultencoding('utf-8')
 
 def _bytes_feature(value):
+    value = [word.encode('utf-8') for word in value]
     return tf.train.Feature(bytes_list=tf.train.BytesList(value=value))
 
 def _convert(text):
@@ -25,7 +24,6 @@ def _write_tfrecords(filename, examples_list):
 
 def main(args):
     examples = []
-    np.random.seed(RAND_SEED)
 
     with open(args.filename, 'r', encoding='utf-8') as f:
         for line in f:
