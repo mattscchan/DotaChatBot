@@ -1,3 +1,4 @@
+import re
 import json
 import argparse
 import numpy as np
@@ -43,6 +44,8 @@ class LossHistory(Callback):
 
     def on_batch_end(self, batch, logs={}):
         self.train_acc.append(logs.get('acc'))
+
+    def on_epoch_end(self, epoch, logs={}):
         self.valid_acc.append(logs.get('val_acc'))
 
 def combine(c, r):
@@ -104,7 +107,7 @@ def model(const, hyper, train, valid, test=None, epochs=1, saved_name=None, save
               )
 
     if test:
-        score = dual_encoder.evaluate(X_test, y_test, batch_size=32)
+        score = dual_encoder.evaluate([test.context, test.response], test.label, batch_size=hyper.batch_size)
         test_acc = score[1]
     else:
         test_acc = None
@@ -130,7 +133,7 @@ def log_history(train_acc, valid_acc, path, test_acc=None):
 def main(args):
     # Parameters
     hyper = Hyper(
-        hidden_units=[200],
+        hidden_units=[100],
         lr=0.0001,
         clipnorm=0,
         batch_size=256,
@@ -147,16 +150,19 @@ def main(args):
     alphabet = ''
 
     print('LOADING DATA\n------------')
-    train = load_data(args.data_directory + '/' + args.mini_data + 'train.json', const.max_timesteps)
-    valid = load_data(args.data_directory + '/' + args.mini_data + 'valid.json', const.max_timesteps)
+    train = load_data(args.data_directory +'/'+ args.mini_data + args.tiny_data + 'train.json', const.max_timesteps)
+    valid = load_data(args.data_directory +'/'+ args.mini_data + args.tiny_data + 'valid.json', const.max_timesteps)
+    test = load_data(args.data_directory +'/'+ args.mini_data + args.tiny_data + 'test.json', const.max_timesteps)
     print('Training data:', train.context.shape)
     print('Validation data:', valid.context.shape)
+    print('Testing data:', test.context.shape)
 
     print('TRAINING MODEL\n--------------')
-    saved_name = args.save_directory + '/' + args.mini_data + 'best.keras'
-    log_name = args.save_directory + '/' + args.mini_data + 'best.log'
-    train_acc, valid_acc = model(const, hyper, train, valid, epochs=args.num_epochs, saved_name=saved_name)
-    log_history(str(train_acc), str(valid_acc),str(test_acc), log_name)
+    saved_name = args.save_directory + '/' + args.mini_data + args.tiny_data + 'best.keras'
+    log_name = args.save_directory + '/' + args.mini_data + args.tiny_data + 'best.log'
+    train_acc, valid_acc, test_acc = model(const, hyper, train, valid, test, epochs=args.num_epochs, saved_name=saved_name)
+    print(train_acc, valid_acc, test_acc)
+    log_history(train_acc=str(train_acc), valid_acc=str(valid_acc),test_acc=str(test_acc), path=log_name)
 
 if __name__ == '__main__':
     # TODO load model, automatic naming of model
@@ -165,6 +171,7 @@ if __name__ == '__main__':
     parser.add_argument('save_directory', help='Where to save/load the training model')
     parser.add_argument('data_directory', help='Directory containing data files')
     parser.add_argument('-m', '--mini_data', action='store_const', const= 'mini_', default='')
+    parser.add_argument('-t', '--tiny_data', action='store_const', const= 'tiny_', default='')
     parser.add_argument('-s', '--saved', action='store_true', default=False)
     parser.add_argument('-n', '--num_epochs', type=int, default=1)
     args = parser.parse_args()
