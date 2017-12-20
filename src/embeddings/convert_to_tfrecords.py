@@ -32,7 +32,7 @@ def main(args):
             obj = json.loads(line)
             examples.append(_convert(obj['chat']))
 
-    _write_tfrecords('billion_chats.tfrecords', examples)
+    _write_tfrecords('./data/billion_chats.tfrecords', examples)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
