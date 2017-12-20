@@ -27,62 +27,62 @@ def load_table(vectorfile):
 			values.append(line)
 	return values
 
-# def convert_words_to_index(words, dictionary):
-#     """ Replace each word in the dataset with its index in the dictionary """
-#     return [dictionary[word] if word in dictionary else 0 for word in words]
+def convert_words_to_index(words, dictionary):
+    """ Replace each word in the dataset with its index in the dictionary """
+    return [dictionary[word] if word in dictionary else 0 for word in words]
 
-# def generate_sample(index_words, context_window_size):
-# 	""" Form training pairs according to the skip-gram model. """
-# 	for index, center in enumerate(index_words):
-# 		context = random.randint(1, context_window_size)
-# 		# get a random target before the center word
-# 		for target in index_words[max(0, index - context): index]:
-# 			yield center, target
-# 		# get a random target after the center wrod
-# 		for target in index_words[index + 1: index + context + 1]:
-# 			yield center, target
+def generate_sample(index_words, context_window_size):
+	""" Form training pairs according to the skip-gram model. """
+	for index, center in enumerate(index_words):
+		context = random.randint(1, context_window_size)
+		# get a random target before the center word
+		for target in index_words[max(0, index - context): index]:
+			yield center, target
+		# get a random target after the center wrod
+		for target in index_words[index + 1: index + context + 1]:
+			yield center, target
 
-# def get_batch(iterator, batch_size):
-#     """ Group a numerical stream into batches and yield them as Numpy arrays. """
-#     while True:
-#         center_batch = np.zeros(batch_size, dtype=np.int32)
-#         target_batch = np.zeros([batch_size, 1])
-#         for index in range(batch_size):
-#             center_batch[index], target_batch[index] = next(iterator)
-#         yield center_batch, target_batch
+def get_batch(iterator, batch_size):
+    """ Group a numerical stream into batches and yield them as Numpy arrays. """
+    while True:
+        center_batch = np.zeros(batch_size, dtype=np.int32)
+        target_batch = np.zeros([batch_size, 1])
+        for index in range(batch_size):
+            center_batch[index], target_batch[index] = next(iterator)
+        yield center_batch, target_batch
 
-def parse_JSON(example):
-    feature = {
-                "text": tf.FixedLenFeature([], tf.string)
-            }
-    obj_ex = tf.parse_example(example, feature)
+# def parse_JSON(example):
+#     feature = {
+#                 "text": tf.FixedLenFeature([], tf.string)
+#             }
+#     obj_ex = tf.parse_example(example, feature)
     
-    return tf.sparse_tensor_to_dense(tf.string_split(obj_ex["text"]), default_value='π')
+#     return tf.sparse_tensor_to_dense(tf.string_split(obj_ex["text"]), default_value='π')
 
 
-def create_dataset(filenames, parse_function, table, context, vocab_size, num_parallel_calls=1, batch_size=32,  shuffle_buffer=10000, num_epochs=1):
+# def create_dataset(filenames, parse_function, table, context, vocab_size, num_parallel_calls=1, batch_size=32,  shuffle_buffer=10000, num_epochs=1):
 
-    def generate_example(chat):
-        couples, labels = tf.keras.preprocessing.sequence.skipgrams(chat, vocab_size, seed=RAND_SEED)
-        return couples, labels
+#     def generate_example(chat):
+#         couples, labels = tf.keras.preprocessing.sequence.skipgrams(chat, vocab_size, seed=RAND_SEED)
+#         return couples, labels
 
-    dataset = tf.data.TFRecordDataset(filenames)
-    dataset = dataset.batch(32)
-    dataset = dataset.map(parse_function, num_parallel_calls=num_parallel_calls)
-    dataset = dataset.map(lambda x: table.lookup(x), num_parallel_calls=num_parallel_calls)
-    dataset = dataset.map(generate_example, num_parallel_calls=num_parallel_calls)
+#     dataset = tf.data.TFRecordDataset(filenames)
+#     dataset = dataset.batch(32)
+#     dataset = dataset.map(parse_function, num_parallel_calls=num_parallel_calls)
+#     dataset = dataset.map(lambda x: table.lookup(x), num_parallel_calls=num_parallel_calls)
+#     dataset = dataset.map(generate_example, num_parallel_calls=num_parallel_calls)
 
-    if num_epochs < 0:
-        dataset = dataset.repeat()
-    else:
-        dataset = dataset.repeat(num_epochs)
+#     if num_epochs < 0:
+#         dataset = dataset.repeat()
+#     else:
+#         dataset = dataset.repeat(num_epochs)
 
-    dataset = dataset.shuffle(shuffle_buffer)
-    dataset = dataset.prefetch(10000)
-    iterator = dataset.make_initializable_iterator()
-    next_element = iterator.get_next()
+#     dataset = dataset.shuffle(shuffle_buffer)
+#     dataset = dataset.prefetch(10000)
+#     iterator = dataset.make_initializable_iterator()
+#     next_element = iterator.get_next()
 
-    return next_element, iterator
+#     return next_element, iterator
 
 
 def main(args):

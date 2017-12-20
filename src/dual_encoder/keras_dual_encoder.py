@@ -5,7 +5,7 @@ import tensorflow as tf
 from collections import namedtuple
 
 from tensorflow.python.keras.models import Sequential, Model, load_model
-from tensorflow.python.keras.layers import Input, Embedding, LSTM, Dense, multiply
+from tensorflow.python.keras.layers import Input, Embedding, LSTM, Dense, concatenate
 from tensorflow.python.keras.callbacks import ModelCheckpoint, Callback
 from tensorflow.python.keras.preprocessing.sequence import pad_sequences
 from tensorflow.python.keras import optimizers
@@ -45,7 +45,7 @@ class LossHistory(Callback):
         self.valid_acc.append(logs.get('val_acc'))
 
 def combine(c, r):
-    return multiply([c, r], name='Combine')
+    return concatenate([c, r], name='Combine')
 
 def model(const, hyper, train, valid, test=None, epochs=1, saved_name=None, saved=False):
     if saved:
