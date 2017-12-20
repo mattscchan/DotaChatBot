@@ -62,7 +62,11 @@ def model(const, hyper, train, valid, test=None, epochs=1, saved_name=None, save
                             #weights=[],
                             name='Embedding'
                             ))
-        encoder.add(LSTM(units=hyper.hidden_units, name='LSTM'))
+        if len(hyper.hidden_units) > 1:
+            for i, units in enumerate(hyper.hidden_layers):
+                if i != len(hyper.hidden_units)-1:
+                    encoder.add(LSTM(units, return_sequences=True, name='LSTM'+str(units)))
+        encoder.add(LSTM(units=hyper.hidden_units, name='LSTM'+str(hyper.hidden_units[-1]))
         
         context = Input(shape=(const.max_timesteps,), dtype='int32', name='Context')
         response = Input(shape=(const.max_timesteps,), dtype='int32', name='Response')
@@ -117,7 +121,7 @@ def log_history(train_acc, valid_acc, path, test_acc=None):
 
 def main(args):
     hyper = Hyper(
-        hidden_units=100,
+        hidden_units=[100],
         lr=0.0001,
         clipnorm=10,
         batch_size=512,
