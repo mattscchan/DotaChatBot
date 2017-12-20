@@ -52,13 +52,13 @@ def load_table(vectorfile):
 #         yield center_batch, target_batch
 
 def parse_JSON(example):
-    # parsed_ex = tf.decode_json_example(example)
+    parsed_ex = tf.decode_json_example(example)
     shape = {
-                "feature": tf.FixedLenFeature([], tf.string)
+                "chat": tf.FixedLenFeature([], tf.string)
             }
     obj_ex = tf.parse_single_example(example, shape)
     
-    return obj_ex["feature"]
+    return obj_ex["chat"]
 
 
 def create_dataset(filenames, parse_function, table, context, num_parallel_calls=1, batch_size=32,  shuffle_buffer=10000, num_epochs=1):
