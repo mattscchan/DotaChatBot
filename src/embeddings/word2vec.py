@@ -69,8 +69,8 @@ def create_dataset(filenames, parse_function, table, context, num_parallel_calls
 
     dataset = tf.data.TFRecordDataset(filenames)
     dataset = dataset.map(parse_function, num_parallel_calls=num_parallel_calls)
-    dataset = dataset.map(lambda x: table.lookup(x), num_parallel_calls=num_parallel_calls)
-    dataset = dataset.map(lambda x: tuple(tf.py_func(generate_example, [x], [tf.int64, tf.int64])), num_parallel_calls=num_parallel_calls)
+    # dataset = dataset.map(lambda x: print(type(x)) table.lookup(x), num_parallel_calls=num_parallel_calls)
+    # dataset = dataset.map(lambda x: tuple(tf.py_func(generate_example, [x], [tf.int64, tf.int64])), num_parallel_calls=num_parallel_calls)
 
     if num_epochs < 0:
         dataset = dataset.repeat()
@@ -88,7 +88,7 @@ def create_dataset(filenames, parse_function, table, context, num_parallel_calls
 
 def main(args):
 	values = load_table(args.vectors)
-	table = tf.contrib.lookup.index_table_from_tensor(values, default_value=0)
+	table = tf.contrib.lookup.index_table_from_tensor(values, default_value=0, name="TABLE")
 	
 	filenames = tf.placeholder(tf.string, shape=[None])
 
