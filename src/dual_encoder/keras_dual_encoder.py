@@ -67,6 +67,7 @@ def model(const, hyper, train, valid, test=None, epochs=1, saved_name=None, save
                 if i != len(hyper.hidden_units)-1:
                     encoder.add(LSTM(units, return_sequences=True, name='LSTM'+str(units) + '-' + str(i)))
         encoder.add(LSTM(units=hyper.hidden_units[-1], name='LSTM'+str(hyper.hidden_units[-1]) + '-' + str(i+1)))
+        encoder.summary()
         
         context = Input(shape=(const.max_timesteps,), dtype='int32', name='Context')
         response = Input(shape=(const.max_timesteps,), dtype='int32', name='Response')
