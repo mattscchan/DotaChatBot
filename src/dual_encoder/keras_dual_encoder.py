@@ -16,7 +16,7 @@ tf.set_random_seed(SEED)
 
 # HYPERPARAMETERS
 Hyper = namedtuple('Hyper', 
-        ['hidden_units', 'lr', 'clipnorm', 'batch_size', 'optimizer', 'kernel_init', 'recurrent_init'])
+        ['hidden_units', 'lr', 'clipnorm', 'batch_size', 'optimizer', 'kernel_init', 'recurrent_init', 'dropout'])
 Const = namedtuple('Const', ['embedding_size', 'max_timesteps', 'vocab_size'])
 
 # DATASET
@@ -81,6 +81,8 @@ def model(const, hyper, train, valid, test=None, epochs=1, saved_name=None, save
         response_encoder = encoder(response)
         
         combined = combine(context_encoder, response_encoder)
+        if hyper.dropout:
+            combined = Dropout(hyper.dropout)(combined)
         similarity = Dense((1), activation = "sigmoid", name='Output') (combined)
         
         dual_encoder = Model([context, response], similarity, name='Dual_Encoder')
@@ -132,6 +134,7 @@ def main(args):
         lr=0.0001,
         clipnorm=0,
         batch_size=256,
+        dropout=None,
         optimizer=optimizers.Adam,
         kernel_init=initializers.RandomUniform(minval=-0.01, maxval=0.01, seed=SEED),
         recurrent_init=initializers.Orthogonal(seed=SEED),
