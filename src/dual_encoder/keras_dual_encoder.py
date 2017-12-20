@@ -121,7 +121,7 @@ def log_history(train_acc, valid_acc, path, test_acc=None):
 
 def main(args):
     hyper = Hyper(
-        hidden_units=[100],
+        hidden_units=[100, 100],
         lr=0.0001,
         clipnorm=10,
         batch_size=512,
