@@ -65,7 +65,7 @@ def model(const, hyper, train, valid, test=None, epochs=1, saved_name=None, save
                             ))
         if not hyper.kernel_init:
             hyper.kernel_init='glorot_uniform'
-        if no hyper.recurrent_init:
+        if not hyper.recurrent_init:
             hyper.recurrent_init='orthogonal'
         ret_seq=True
         for i, units in enumerate(hyper.hidden_units):
@@ -126,11 +126,12 @@ def log_history(train_acc, valid_acc, path, test_acc=None):
         path.write(train_acc + ',' + valid_acc + ',' + test_acc + '\n')
 
 def main(args):
+    # Parameters
     hyper = Hyper(
-        hidden_units=[100],
+        hidden_units=[200],
         lr=0.0001,
-        clipnorm=10,
-        batch_size=512,
+        clipnorm=0,
+        batch_size=256,
         optimizer=optimizers.Adam,
         kernel_init=initializers.RandomUniform(minval=-0.01, maxval=0.01, seed=SEED),
         recurrent_init=initializers.Orthogonal(seed=SEED),
