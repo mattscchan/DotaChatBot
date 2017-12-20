@@ -63,6 +63,10 @@ def model(const, hyper, train, valid, test=None, epochs=1, saved_name=None, save
                             #weights=[],
                             name='Embedding'
                             ))
+        if not hyper.kernel_init:
+            hyper.kernel_init='glorot_uniform'
+        if no hyper.recurrent_init:
+            hyper.recurrent_init='orthogonal'
         ret_seq=True
         for i, units in enumerate(hyper.hidden_units):
             if i == len(hyper.hidden_units)-1:
