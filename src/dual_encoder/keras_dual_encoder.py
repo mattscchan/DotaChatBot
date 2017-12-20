@@ -21,7 +21,7 @@ Const = namedtuple('Const', ['embedding_size', 'max_timesteps', 'vocab_size'])
 # DATASET
 def load_json(file):
     df = []
-    with open(file, 'r') as f:
+    with open(file, 'r', encoding='utf-8') as f:
         for line in f:
             df.append(json.loads(line))
     return df
@@ -63,10 +63,10 @@ def model(const, hyper, train, valid, test=None, epochs=1, saved_name=None, save
                             name='Embedding'
                             ))
         if len(hyper.hidden_units) > 1:
-            for i, units in enumerate(hyper.hidden_layers):
+            for i, units in enumerate(hyper.hidden_units):
                 if i != len(hyper.hidden_units)-1:
-                    encoder.add(LSTM(units, return_sequences=True, name='LSTM'+str(units)))
-        encoder.add(LSTM(units=hyper.hidden_units, name='LSTM'+str(hyper.hidden_units[-1]))
+                    encoder.add(LSTM(units, return_sequences=True, name='LSTM'+str(units) + '-' + str(i)))
+        encoder.add(LSTM(units=hyper.hidden_units[-1], name='LSTM'+str(hyper.hidden_units[-1]) + '-' + str(i+1)))
         
         context = Input(shape=(const.max_timesteps,), dtype='int32', name='Context')
         response = Input(shape=(const.max_timesteps,), dtype='int32', name='Response')
@@ -116,7 +116,7 @@ def log_history(train_acc, valid_acc, path, test_acc=None):
     train_acc = clean_funcname(train_acc)
     valid_acc = clean_funcname(valid_acc)
     test_acc = clean_funcname(test_acc)
-    with open(path, 'a') as path:
+    with open(path, 'a', encoding='utf-8') as path:
         path.write(train_acc + ',' + valid_acc + ',' + test_acc + '\n')
 
 def main(args):
