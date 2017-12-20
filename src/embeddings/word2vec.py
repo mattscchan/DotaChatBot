@@ -60,18 +60,18 @@ def parse_JSON(example):
     return tf.sparse_tensor_to_dense(tf.string_split(obj_ex["text"]), default_value='π')
 
 
-def create_dataset(filenames, parse_function, table, context, num_parallel_calls=1, batch_size=32,  shuffle_buffer=10000, num_epochs=1):
+def create_dataset(filenames, parse_function, table, context, vocab_size, num_parallel_calls=1, batch_size=32,  shuffle_buffer=10000, num_epochs=1):
 
     def generate_example(chat):
         target = random.randint(0, len(chat))   
-        context = random.randint(max(target-context, 0), min(target+context, len(chat)-1))
-        return chat[target], chat[context]
+        index = random.randint(max(target-context, 0), min(target+context, len(chat)-1))
+        return chat[target], chat[index]
 
     dataset = tf.data.TFRecordDataset(filenames)
     dataset = dataset.batch(32)
     dataset = dataset.map(parse_function, num_parallel_calls=num_parallel_calls)
     dataset = dataset.map(lambda x: table.lookup(x), num_parallel_calls=num_parallel_calls)
-    dataset = dataset.map(lambda x: tuple(tf.py_func(generate_example, [x], [tf.int64, tf.int64])), num_parallel_calls=num_parallel_calls)
+    dataset = dataset.map(lambda x: tf.keras.preprocessing.sequence(x, vocab_size, seed=RAND_SEED), num_parallel_calls=num_parallel_calls)
 
     if num_epochs < 0:
         dataset = dataset.repeat()
@@ -92,7 +92,7 @@ def main(args):
 	
 	filenames = tf.placeholder(tf.string, shape=[None])
 
-	next_element, iterator = create_dataset(filenames, parse_JSON, table, args.context, num_parallel_calls=4)
+	next_element, iterator = create_dataset(filenames, parse_JSON, table, args.context, args.vocab_size*10000, num_parallel_calls=4)
 
 	with tf.Session() as sess:
 		sess.run(iterator.initializer, feed_dict={filenames: [args.data]})
@@ -108,5 +108,6 @@ if __name__ == '__main__':
 	parser.add_argument('vectors')
 	parser.add_argument('data')
 	parser.add_argument('context', type=int)
+    parser.add_argument('vocab_size', type=int)
 	args = parser.parse_args()
 	main(args)
