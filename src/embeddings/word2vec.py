@@ -54,7 +54,7 @@ def load_table(vectorfile):
 def parse_JSON(example):
     parsed_ex = tf.decode_json_example(example)
     shape = {
-                "chat": tf.VarLenFeature([], tf.string)
+                "chat": tf.VarLenFeature(tf.string)
             }
     obj_ex = tf.parse_single_example(example, shape)
     
