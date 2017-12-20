@@ -22,7 +22,7 @@ def str_to_int(utt, newline=True):
 		if c == 'π':
 			arr.append(1)
 		else:
-			arr.append(ord(c)-27)
+			arr.append(ord(c)-29)
 
 	if newline:
 		arr.append(2)
@@ -61,9 +61,9 @@ def main(args):
 	buff = SequenceBuff(args.buffersize)
 	write_arr = []
 	count = 0
-	train_file = 'train.json'
-	valid_file = 'valid.json'
-	test_file = 'test.json'
+	train_file = './data/train.json'
+	valid_file = './data/valid.json'
+	test_file = './data/test.json'
 
 	with open(args.filename, 'r', encoding='utf-8') as raw:
 
@@ -101,6 +101,9 @@ def main(args):
 			obj_real = {'context': context, 'next_utt': next_utt, 'label': 0}
 			obj_fake = {'context': context, 'next_utt': fake_utt, 'label': 1}
 			
+			write_arr.append(obj_real)
+			write_arr.append(obj_fake)
+
 			count += 1
 
 			if count % 100000 == 0:
@@ -120,16 +123,19 @@ def main(args):
 				with open(train_file, 'a', encoding='utf-8') as train:
 					for el in train_arr:
 						train.write(json.dumps(el))
+						train.write('\n')
 						
 				# Valid file
 				with open(valid_file, 'a', encoding='utf-8') as valid:
 					for el in valid_arr:
 						valid.write(json.dumps(el))
+						valid.write('\n')
 
 				# Test file
 				with open(test_file, 'a', encoding='utf-8') as test:
 					for el in test_arr:
 						test.write(json.dumps(el))
+						test.write('\n')
 
 				del write_arr[:]
 				del train_arr

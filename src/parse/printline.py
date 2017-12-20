@@ -9,7 +9,6 @@ def main(args):
 				print(line)
 				if args.json:
 					obj = json.loads(line)
-					print(obj['context_size'])
 					print(obj['context'])
 					print(obj['next_utt'])
 					print(obj['label'])
