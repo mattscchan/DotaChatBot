@@ -5,7 +5,7 @@ import tensorflow as tf
 from collections import namedtuple
 
 from tensorflow.python.keras.models import Sequential, Model, load_model
-from tensorflow.python.keras.layers import Input, Embedding, LSTM, Dense, concatenate
+from tensorflow.python.keras.layers import Input, Embedding, LSTM, Dense, concatenate, Dropout
 from tensorflow.python.keras.callbacks import ModelCheckpoint, Callback
 from tensorflow.python.keras.preprocessing.sequence import pad_sequences
 from tensorflow.python.keras import optimizers, initializers
