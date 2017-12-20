@@ -52,11 +52,11 @@ def load_table(vectorfile):
 #         yield center_batch, target_batch
 
 def parse_JSON(example):
-    parsed_ex = tf.decode_json_example(example)
+    # parsed_ex = tf.decode_json_example(example)
     shape = {
                 "feature": tf.FixedLenFeature([], tf.string)
             }
-    obj_ex = tf.parse_single_example(parsed_ex, shape)
+    obj_ex = tf.parse_single_example(example, shape)
     
     return obj_ex["feature"]
 
