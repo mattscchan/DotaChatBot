@@ -93,8 +93,11 @@ def model(const, hyper, train, valid, test=None, epochs=1, saved_name=None, save
 
     if test:
         score = dual_encoder.evaluate(X_test, y_test, batch_size=32)
+        test_acc = score[1]
+    else:
+        test_acc = None
 
-    return history.train_acc, history.valid_acc
+    return history.train_acc, history.valid_acc, test_acc
 
 def clean_funcname(string):
     if string:
@@ -134,9 +137,9 @@ def main(args):
     print('Validation data:', valid.context.shape)
 
     print('TRAINING MODEL\n--------------')
-    save_name = args.save_directory + '/' + args.mini_data + 'best.keras', saved=args.saved
+    saved_name = args.save_directory + '/' + args.mini_data + 'best.keras'
     log_name = args.save_directory + '/' + args.mini_data + 'best.log'
-    train_acc, valid_acc = model(const, hyper, train, valid, epochs=args.num_epochs saved_name=saved_name)
+    train_acc, valid_acc = model(const, hyper, train, valid, epochs=args.num_epochs, saved_name=saved_name)
     log_history(str(train_acc), str(valid_acc),str(test_acc), log_name)
 
 if __name__ == '__main__':
