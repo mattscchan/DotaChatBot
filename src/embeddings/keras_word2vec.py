@@ -19,7 +19,7 @@ def read_data(datafile):
 	word_target = []
 	labels = []
 	with open(datafile, 'r', encoding='utf-8') as f:
-		for line in file:
+		for line in f:
 			row = line.split(',')
 			word_context.append(int(row[0]))
 			word_target.append(int(row[1]))
