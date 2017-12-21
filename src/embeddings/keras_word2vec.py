@@ -35,6 +35,7 @@ def main(args):
 	vocab_size = int(vocab_str) * 1000
 
 	word_context, word_target, labels = read_data(args.data)	
+	print("Read all data!")
 	# sampling_table = sequence.make_sampling_table(vocab_size)
 
 	# word_target = []

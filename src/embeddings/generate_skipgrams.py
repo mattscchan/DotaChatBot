@@ -47,7 +47,8 @@ def main(args):
 
 		count += 1
 		
-		if count % 100000 == 0:
+		if count % 1000000 == 0:
+			print(count)
 			with open('./data/'+vocab_str+'_skipgrams.txt', 'a', encoding='utf-8') as f:
 				for index in range(0, len(word_context)):
 					write_str = str(word_context[index]) + ','
