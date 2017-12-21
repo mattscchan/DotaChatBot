@@ -42,9 +42,9 @@ def main(args):
 
 	vocab_str = re.sub(r'\D', '', args.data)
 	vocab_size = int(vocab_str) * 1000
-
-	word_context, word_target, labels = read_data(args.data)	
+	
 	reverse_dictionary = read_vectors('./data/100k_vocab.txt')
+	word_context, word_target, labels = read_data(args.data)	
 	print("Read all data!")
 
 	word_target = np.array(word_target, dtype="int32")
@@ -113,7 +113,7 @@ def main(args):
 	    if cnt % 50000 == 0:
         	sim_cb.run_sim()
         	model.save_weights('./data/models/embeddings_'+str(cnt)+'.h5')
-        	mode.save('./data/models/graph_'str(cnt)+'.h5')
+        	mode.save('./data/models/graph_'+str(cnt)+'.h5')
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
