@@ -8,19 +8,23 @@ import json
 import tensorflow as tf
 import numpy as np
 import re
+import csv
 
 SEED = int('0xCAFEBABE', 16)
 np.random.seed(SEED)
 tf.set_random_seed(SEED)
 
 def read_data(datafile):
-	data = []
+	word_context = []
+	word_target = []
+	labels = []
 	with open(datafile, 'r', encoding='utf-8') as f:
-		for line in f:
-			obj = json.loads(line)
-			chat = obj["chat"]
-			data.append(chat)
-	return data
+		file = csv.reader(f)
+		for row in file:
+			word_context.append(row[0])
+			word_target.append(row[1])
+			labels.append(row[2])
+	return word_context, word_target, labels
 
 def main(args):
 	window_size = 3
@@ -30,31 +34,26 @@ def main(args):
 	vocab_str = re.sub(r'\D', '', args.data)
 	vocab_size = int(vocab_str) * 1000
 
-	data = read_data(args.data)	
-	sampling_table = sequence.make_sampling_table(vocab_size)
+	word_context, word_target, labels = read_data(args.data)	
+	# sampling_table = sequence.make_sampling_table(vocab_size)
 
-	word_target = []
-	word_context = []
-	labels = []
-	print("DATA LOADED!")
-	count = 0
-	for convo in data:
-		couples, tmp_labels = skipgrams(convo, vocab_size, window_size=window_size, sampling_table=sampling_table)
-		if len(couples) < 1:
-			continue
-		labels += tmp_labels
-		tmp_target, tmp_context = zip(*couples)
-		word_target += tmp_target
-		word_context += tmp_context
-
-		count += 1
-		
-		if count % 100000 == 0:
-			with open('./data/'+vocab_str+'_skipgrams.txt', 'a', encoding='utf-8'):
+	# word_target = []
+	# word_context = []
+	# labels = []
+	# print("DATA LOADED!")
+	# count = 0
+	# for convo in data:
+	# 	couples, tmp_labels = skipgrams(convo, vocab_size, window_size=window_size, sampling_table=sampling_table)
+	# 	if len(couples) < 1:
+	# 		continue
+	# 	labels += tmp_labels
+	# 	tmp_target, tmp_context = zip(*couples)
+	# 	word_target += tmp_target
+	# 	word_context += tmp_context
 
 
-	print("FINISHED GENERATING SKIP GRAMS!")
-	del data
+	# print("FINISHED GENERATING SKIP GRAMS!")
+	# del data
 
 	word_target = np.array(word_target, dtype="int32")
 	word_context = np.array(word_context, dtype="int32")
