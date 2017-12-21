@@ -37,6 +37,7 @@ def main(args):
 	word_context = []
 
 	for convo in data:
+		print(convo)
 		couples, labels = skipgrams(convo, vocab_size, window_size=window_size, sampling_table=sampling_table)
 		tmp_target, tmp_context = zip(*couples)
 		word_target += tmp_target
