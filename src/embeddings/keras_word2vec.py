@@ -29,13 +29,16 @@ def read_data(datafile):
 	word_context = []
 	word_target = []
 	labels = []
-	
+	index = 0
 	with open(datafile, 'r', encoding='utf-8') as f:
 		for line in f:
+			if index > 10000:
+				break
 			row = line.split(',')
 			word_context.append(int(row[0]))
 			word_target.append(int(row[1]))
 			labels.append(int(row[2]))
+			index += 1
 
 	return word_context, word_target, labels
 
@@ -94,6 +97,9 @@ def main(args):
 	                close_word = reverse_dictionary[nearest[k]]
 	                log_str = '%s %s,' % (log_str, close_word)
 	            print(log_str)
+	            with open('./data/embed_log.txt', 'a', encoding='utf-8') as f:
+	            	f.write(log_str)
+	            	f.write('\n')
 
 	    @staticmethod
 	    def _get_sim(valid_word_idx):
