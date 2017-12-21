@@ -42,8 +42,9 @@ def main(args):
 
 	vocab_str = re.sub(r'\D', '', args.data)
 	vocab_size = int(vocab_str) * 1000
-	
+
 	reverse_dictionary = read_vectors('./data/100k_vocab.txt')
+	print('Dict done!')
 	word_context, word_target, labels = read_data(args.data)	
 	print("Read all data!")
 
