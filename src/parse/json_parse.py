@@ -157,16 +157,19 @@ def main(args):
 	with open(train_file, 'a', encoding='utf-8') as train:
 		for el in train_arr:
 			train.write(json.dumps(el))
+			train.write('\n')
 			
 	# Valid file
 	with open(valid_file, 'a', encoding='utf-8') as valid:
 		for el in valid_arr:
 			valid.write(json.dumps(el))
+			valid.write('\n')
 
 	# Test file
 	with open(test_file, 'a', encoding='utf-8') as test:
 		for el in test_arr:
 			test.write(json.dumps(el))
+			test.write('\n')
 
 
 
