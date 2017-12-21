@@ -21,9 +21,9 @@ def read_data(datafile):
 	with open(datafile, 'r', encoding='utf-8') as f:
 		file = csv.reader(f)
 		for row in file:
-			word_context.append(row[0])
-			word_target.append(row[1])
-			labels.append(row[2])
+			word_context.append(int(row[0]))
+			word_target.append(int(row[1]))
+			labels.append(int(row[2]))
 	return word_context, word_target, labels
 
 def main(args):
