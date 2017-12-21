@@ -85,8 +85,10 @@ def model(const, hyper, train, valid, test=None, epochs=1, saved_name=None, save
         
         combined = combine(context_encoder, response_encoder)
         if hyper.dropout:
-            combined = Dropout(hyper.dropout)(combined)
-        similarity = Dense((1), activation = "sigmoid", name='Output') (combined)
+            dropout = Dropout(hyper.dropout)(combined)
+        else:
+            dropout = combined
+        similarity = Dense((1), activation = "sigmoid", name='Output') (dropout)
         
         dual_encoder = Model([context, response], similarity, name='Dual_Encoder')
     dual_encoder.summary()
@@ -133,11 +135,11 @@ def log_history(train_acc, valid_acc, path, test_acc=None):
 def main(args):
     # ---------------------------------------------------------------------------------------------------- Parameters
     hyper = Hyper(
-        hidden_units=[200],
-        lr=0.0001,
+        hidden_units=[100, 100],
+        lr=0.001,
         clipnorm=0,
-        batch_size=256,
-        dropout=None,
+        batch_size=4096,
+        dropout=0.5,
         optimizer=optimizers.Adam,
         kernel_init=initializers.RandomUniform(minval=-0.01, maxval=0.01, seed=SEED),
         recurrent_init=initializers.Orthogonal(seed=SEED),
@@ -151,9 +153,9 @@ def main(args):
 
     # ------------------------------------------------------------------------------------------------------ Training
     print('LOADING DATA\n------------')
-    train = load_data(args.data_directory +'/'+ args.mini_data + args.tiny_data + 'train.json', const.max_timesteps)
-    valid = load_data(args.data_directory +'/'+ args.mini_data + args.tiny_data + 'valid.json', const.max_timesteps)
-    test = load_data(args.data_directory +'/'+ args.mini_data + args.tiny_data + 'test.json', const.max_timesteps)
+    train = load_data('data' +'/'+ args.mini_data + args.tiny_data + 'train.json', const.max_timesteps)
+    valid = load_data('data' +'/'+ args.mini_data + args.tiny_data + 'valid.json', const.max_timesteps)
+    test = load_data('data' +'/'+ args.mini_data + args.tiny_data + 'test.json', const.max_timesteps)
     print('Training data:', train.context.shape)
     print('Validation data:', valid.context.shape)
     print('Testing data:', test.context.shape)
@@ -161,7 +163,7 @@ def main(args):
     print('TRAINING MODEL\n--------------')
     saved_name = args.save_directory + '/' + args.mini_data + args.tiny_data + 'best.keras'
     log_name = args.save_directory + '/' + args.mini_data + args.tiny_data + 'best.log'
-    train_acc, valid_acc, test_acc = model(const, hyper, train, valid, test, epochs=args.num_epochs, saved_name=saved_name)
+    train_acc, valid_acc, test_acc = model(const, hyper, train, valid, test, epochs=args.num_epochs, saved_name=saved_name, saved=args.saved)
     print(train_acc, valid_acc, test_acc)
     log_history(train_acc=str(train_acc), valid_acc=str(valid_acc),test_acc=str(test_acc), path=log_name)
 
@@ -170,7 +172,6 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(
             description='Dual LSTM encoder model for next utterance classification.')
     parser.add_argument('save_directory', help='Where to save/load the training model')
-    parser.add_argument('data_directory', help='Directory containing data files')
     parser.add_argument('-m', '--mini_data', action='store_const', const= 'mini_', default='')
     parser.add_argument('-t', '--tiny_data', action='store_const', const= 'tiny_', default='')
     parser.add_argument('-s', '--saved', action='store_true', default=False)
