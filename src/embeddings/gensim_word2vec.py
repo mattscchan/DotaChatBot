@@ -33,7 +33,7 @@ def main(args):
 	print(model.wv.similar_by_word('glhf', restrict_vocab=vocab_size))
 	print(model.wv.similar_by_word('gank', restrict_vocab=vocab_size))
 	print(model.wv.similar_by_word('dust', restrict_vocab=vocab_size))
-	print(mode.wv.similar_by_word('smoke', restrict_vocab=vocab_size))
+	print(model.wv.similar_by_word('smoke', restrict_vocab=vocab_size))
 	model.wv.save_word2vec_format('./data/gensim_embeddings.txt', binary=False)
 
 if __name__ == '__main__':
