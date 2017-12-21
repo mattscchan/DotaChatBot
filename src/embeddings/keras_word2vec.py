@@ -81,4 +81,5 @@ def main(args):
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
 	parser.add_argument('data')
-	main()
+	args = parser.parse_args()
+	main(args)
