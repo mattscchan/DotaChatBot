@@ -36,6 +36,7 @@ def main(args):
 	word_target = []
 	word_context = []
 	labels = []
+	print("DATA LOADED!")
 
 	for convo in data:
 		couples, tmp_labels = skipgrams(convo, vocab_size, window_size=window_size, sampling_table=sampling_table)
@@ -46,6 +47,8 @@ def main(args):
 		word_target += tmp_target
 		word_context += tmp_context
 
+	print("FINISHED GENERATING SKIP GRAMS!")
+	
 	word_target = np.array(word_target, dtype="int32")
 	word_context = np.array(word_context, dtype="int32")
 
