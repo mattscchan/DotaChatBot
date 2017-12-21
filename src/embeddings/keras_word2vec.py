@@ -27,17 +27,17 @@ def main(args):
 	vector_dim = 300
 	epochs = 200000
 
-	vocab_size = re.sub(r'\D', '', args.data)
-	vocab_size = int(vocab_size) * 1000
+	vocab_str = re.sub(r'\D', '', args.data)
+	vocab_size = int(vocab_str) * 1000
 
-	data = read_data(args.data)
+	data = read_data(args.data)	
 	sampling_table = sequence.make_sampling_table(vocab_size)
 
 	word_target = []
 	word_context = []
 	labels = []
 	print("DATA LOADED!")
-
+	count = 0
 	for convo in data:
 		couples, tmp_labels = skipgrams(convo, vocab_size, window_size=window_size, sampling_table=sampling_table)
 		if len(couples) < 1:
@@ -47,8 +47,15 @@ def main(args):
 		word_target += tmp_target
 		word_context += tmp_context
 
+		count += 1
+		
+		if count % 100000 == 0:
+			with open('./data/'+vocab_str+'_skipgrams.txt', 'a', encoding='utf-8'):
+
+
 	print("FINISHED GENERATING SKIP GRAMS!")
-	
+	del data
+
 	word_target = np.array(word_target, dtype="int32")
 	word_context = np.array(word_context, dtype="int32")
 
