@@ -23,6 +23,7 @@ def read_data(datafile):
 	return data
 
 def main(args):
+	window_size = 3
 
 	vocab_str = re.sub(r'\D', '', args.data)
 	vocab_size = int(vocab_str) * 1000
