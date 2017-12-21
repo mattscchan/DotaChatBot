@@ -13,7 +13,7 @@ SEED = int('0xCAFEBABE', 16)
 np.random.seed(SEED)
 tf.set_random_seed(SEED)
 
-def read_data(datafile, vectorfile):
+def read_data(datafile):
 	data = []
 	with open(datafile, 'r', encoding='utf-8') as f:
 		for line in f:
