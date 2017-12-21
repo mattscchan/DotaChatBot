@@ -38,7 +38,7 @@ def read_data(datafile):
 def main(args):
 	window_size = 3
 	vector_dim = 300
-	epochs = 200000
+	epochs = 2000000
 
 	vocab_str = re.sub(r'\D', '', args.data)
 	vocab_size = int(vocab_str) * 1000
@@ -108,10 +108,12 @@ def main(args):
 	    arr_2[0,] = word_context[idx]
 	    arr_3[0,] = labels[idx]
 	    loss = model.train_on_batch([arr_1, arr_2], arr_3)
-	    if cnt % 100 == 0:
-	        print("Iteration {}, loss={}".format(cnt, loss))
 	    if cnt % 10000 == 0:
-        sim_cb.run_sim()
+	        print("Iteration {}, loss={}".format(cnt, loss))
+	    if cnt % 50000 == 0:
+        	sim_cb.run_sim()
+        	model.save_weights('./data/models/embeddings_'+str(cnt)+'.h5')
+        	mode.save('./data/models/graph_'str(cnt)+'.h5')
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
