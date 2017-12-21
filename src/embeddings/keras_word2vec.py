@@ -29,16 +29,13 @@ def read_data(datafile):
 	word_context = []
 	word_target = []
 	labels = []
-	i=0
+	
 	with open(datafile, 'r', encoding='utf-8') as f:
 		for line in f:
-			if i > 100:
-				break
 			row = line.split(',')
 			word_context.append(int(row[0]))
 			word_target.append(int(row[1]))
 			labels.append(int(row[2]))
-			i += 1
 
 	return word_context, word_target, labels
 
