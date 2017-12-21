@@ -27,11 +27,16 @@ def main(args):
   
     with open(args.filename, 'r', encoding='utf-8') as f:
         reader = csv.reader(f)
+        index = 0
         for row in reader:
             if int(row[2]) == 0:
                 continue
             examples.append(_convert(int(row[0]), int(row[1])))
+            if index % 1000000:
+                print('We are at', index)
+            index += 1
 
+    print('Writing now...')
     _write_tfrecords('./data/100k_skipgrams.tfrecords', examples)
 
 if __name__ == '__main__':

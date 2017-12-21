@@ -1,6 +1,7 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
+import argparse
 
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL']='2'
@@ -20,7 +21,28 @@ LEARNING_RATE = 1.0
 NUM_TRAIN_STEPS = 10000
 SKIP_STEP = 2000 # how many steps to skip before reporting the loss
 
-def word2vec(batch_gen):
+
+def _parse_function(example_proto):
+    features = {
+        "context": tf.FixedLenFeature([], tf.float32),
+        "target": tf.FixedLenFeature([], tf.int64)
+    }
+    parsed_features = tf.parse_single_example(example_proto, features)
+
+    return parsed_features['context'], parsed_features['target']
+
+def create_dataset(name):
+    data = tf.data.TFRecordDataset(name)
+    data = data.map(_parse_function, num_parallel_calls=8)
+    data = data.batch(100)
+    data = data.shuffle(100000)
+    data = data.prefetch(100000)
+    train_iterator = data.make_initializable_iterator()
+    next_el = train_iterator.get_next()
+
+    return next_el, train_iterator
+
+def word2vec(batch_gen, iterator):
     """ Build the graph for word2vec model and train it """
     # Step 1: define the placeholders for input and output
     with tf.name_scope('data'):
@@ -57,22 +79,27 @@ def word2vec(batch_gen):
     
     with tf.Session() as sess:
         sess.run(tf.global_variables_initializer())
+        sess.run(iterator.initializer, feed_dict={name: ['./data/100k_skipgrams.tfrecords']})
 
         total_loss = 0.0 # we use this to calculate late average loss in the last SKIP_STEP steps
-        writer = tf.summary.FileWriter('./graphs/no_frills/', sess.graph)
+        writer = tf.summary.FileWriter('./data/', sess.graph)
         for index in range(NUM_TRAIN_STEPS):
-            centers, targets = next(batch_gen)
+            batch = sess.run(batch_gen)
             loss_batch, _ = sess.run([loss, optimizer], 
-                                    feed_dict={center_words: centers, target_words: targets})
+                                    feed_dict={center_words: batch[0], target_words: batch[1]})
             total_loss += loss_batch
             if (index + 1) % SKIP_STEP == 0:
                 print('Average loss at step {}: {:5.1f}'.format(index, total_loss / SKIP_STEP))
                 total_loss = 0.0
         writer.close()
 
-def main():
-    batch_gen = process_data(VOCAB_SIZE, BATCH_SIZE, SKIP_WINDOW)
-    word2vec(batch_gen)
+def main(args):
+    name = tf.placeholder(tf.string, shape=[None])
+    batch_gen, iterator = create_dataset(name)
+    word2vec(batch_gen, iterator)
 
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('filenames')
+    args = parser.parse_args()
+    main(args)
