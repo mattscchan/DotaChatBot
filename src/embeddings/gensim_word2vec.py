@@ -16,7 +16,7 @@ def read_data(filename):
 	return sentences
 
 def main(args):
-	vocab_size = 100000
+	vocab_size = 250000
 	logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 
 	examples = read_data(args.filename)
