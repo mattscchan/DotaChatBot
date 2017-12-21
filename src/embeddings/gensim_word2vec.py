@@ -27,7 +27,7 @@ def main(args):
 				yield line
 
 	sentences = myText()
-	model = gensim.models.Word2Vec(sentences, size=300, max_vocab_size=vocab_size, sg=1, sample=0.0001, seed=SEED, min_count=10, workers=16)
+	model = gensim.models.Word2Vec(sentences, size=300, max_vocab_size=vocab_size, sg=1, sample=0.0001, seed=SEED, min_count=10, workers=16, iter=5)
 
 	print(model.wv.similar_by_word('gg', restrict_vocab=vocab_size))
 	print(model.wv.similar_by_word('glhf', restrict_vocab=vocab_size))
