@@ -131,9 +131,9 @@ def log_history(train_acc, valid_acc, path, test_acc=None):
         path.write(train_acc + ',' + valid_acc + ',' + test_acc + '\n')
 
 def main(args):
-    # Parameters
+    # ---------------------------------------------------------------------------------------------------- Parameters
     hyper = Hyper(
-        hidden_units=[100],
+        hidden_units=[200],
         lr=0.0001,
         clipnorm=0,
         batch_size=256,
@@ -149,6 +149,7 @@ def main(args):
     )
     alphabet = ''
 
+    # ------------------------------------------------------------------------------------------------------ Training
     print('LOADING DATA\n------------')
     train = load_data(args.data_directory +'/'+ args.mini_data + args.tiny_data + 'train.json', const.max_timesteps)
     valid = load_data(args.data_directory +'/'+ args.mini_data + args.tiny_data + 'valid.json', const.max_timesteps)
