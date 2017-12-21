@@ -47,7 +47,7 @@ def main(args):
 	vector_dim = 300
 	epochs = 2000000
 
-	valid_size = 16     # Random set of words to evaluate similarity on.
+	valid_size = 5     # Random set of words to evaluate similarity on.
 	valid_window = 100  # Only pick dev samples in the head of the distribution.
 	valid_examples = np.random.choice(valid_window, valid_size, replace=False)
 
@@ -89,7 +89,7 @@ def main(args):
 	    def run_sim(self):
 	        for i in range(0, valid_size):
 	            valid_word = reverse_dictionary[valid_examples[i]]
-	            top_k = 8  # number of nearest neighbors
+	            top_k = 5  # number of nearest neighbors
 	            sim = self._get_sim(valid_examples[i])
 	            nearest = (-sim).argsort()[1:top_k + 1]
 	            log_str = 'Nearest to %s:' % valid_word
@@ -127,7 +127,7 @@ def main(args):
 	    loss = model.train_on_batch([arr_1, arr_2], arr_3)
 	    if cnt % 10000 == 0:
 	        print("Iteration {}, loss={}".format(cnt, loss))
-	    if cnt % 50000 == 0:
+	    if cnt % 500000 == 0:
         	sim_cb.run_sim()
         	model.save_weights('./data/models/embeddings_'+str(cnt)+'.h5')
         	mode.save('./data/models/graph_'+str(cnt)+'.h5')
