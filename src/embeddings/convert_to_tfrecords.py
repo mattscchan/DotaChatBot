@@ -26,12 +26,11 @@ def main(args):
     examples = []
   
     with open(args.filename, 'r', encoding='utf-8') as f:
-        for line in f:
+        reader = csv.reader(f)
+        for row in reader:
             if int(row[2]) == 0:
                 continue
-            line = re.split(r'\n', '', line)
-            row = line.split(',')
-            examples.append(_convert(row[0], row[1]))
+            examples.append(_convert(int(row[0]), int(row[1])))
 
     _write_tfrecords('./data/100k_skipgrams.tfrecords', examples)
 
