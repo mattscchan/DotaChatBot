@@ -40,6 +40,7 @@ def main(args):
 		print(convo)
 		couples, labels = skipgrams(convo, vocab_size, window_size=window_size, sampling_table=sampling_table)
 		print(couples)
+		print(labels)
 		tmp_target, tmp_context = zip(*couples)
 		word_target += tmp_target
 		word_context += tmp_context
