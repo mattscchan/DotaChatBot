@@ -1,5 +1,6 @@
 from keras.models import Model
-from keras.layers import Input, Dense, Reshape, merge
+from keras.layers import Input, Dense, Reshape
+from keras.layers.merge import concatenate
 from keras.layers.embeddings import Embedding
 from keras.preprocessing.sequence import skipgrams
 from keras.preprocessing import sequence
@@ -41,6 +42,10 @@ def main(args):
 	vector_dim = 300
 	epochs = 2000000
 
+	valid_size = 16     # Random set of words to evaluate similarity on.
+	valid_window = 100  # Only pick dev samples in the head of the distribution.
+	valid_examples = np.random.choice(valid_window, valid_size, replace=False)
+
 	vocab_str = re.sub(r'\D', '', args.data)
 	vocab_size = int(vocab_str) * 1000
 
@@ -61,10 +66,10 @@ def main(args):
 	context = embedding(input_context)
 	context = Reshape((vector_dim, 1))(context)
 
-	similarity = merge([target, context], mode='cos', dot_axes=0)
+	similarity = concatenate([target, context], mode='cos', dot_axes=0)
 
 	# now perform the dot product operation to get a similarity measure
-	dot_product = merge([target, context], mode='dot', dot_axes=1)
+	dot_product = concatenate([target, context], mode='dot', dot_axes=1)
 	dot_product = Reshape((1,))(dot_product)
 	# add the sigmoid output layer
 	output = Dense(1, activation='sigmoid')(dot_product)
