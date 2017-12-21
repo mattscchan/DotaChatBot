@@ -14,6 +14,15 @@ SEED = int('0xCAFEBABE', 16)
 np.random.seed(SEED)
 tf.set_random_seed(SEED)
 
+def read_vectors(vectorfile):
+	dictionary = {}
+	index = 0
+	with open(vectorfile, 'r', encoding='utf-8') as f:
+		for line in f:
+			dictionary[index] = line
+			index += 1
+	return dictionary
+
 def read_data(datafile):
 	word_context = []
 	word_target = []
@@ -35,26 +44,8 @@ def main(args):
 	vocab_size = int(vocab_str) * 1000
 
 	word_context, word_target, labels = read_data(args.data)	
+	reverse_dictionary = read_vectors('./data/100k_vocab.txt')
 	print("Read all data!")
-	# sampling_table = sequence.make_sampling_table(vocab_size)
-
-	# word_target = []
-	# word_context = []
-	# labels = []
-	# print("DATA LOADED!")
-	# count = 0
-	# for convo in data:
-	# 	couples, tmp_labels = skipgrams(convo, vocab_size, window_size=window_size, sampling_table=sampling_table)
-	# 	if len(couples) < 1:
-	# 		continue
-	# 	labels += tmp_labels
-	# 	tmp_target, tmp_context = zip(*couples)
-	# 	word_target += tmp_target
-	# 	word_context += tmp_context
-
-
-	# print("FINISHED GENERATING SKIP GRAMS!")
-	# del data
 
 	word_target = np.array(word_target, dtype="int32")
 	word_context = np.array(word_context, dtype="int32")
@@ -68,6 +59,8 @@ def main(args):
 	context = embedding(input_context)
 	context = Reshape((vector_dim, 1))(context)
 
+	similarity = merge([target, context], mode='cos', dot_axes=0)
+
 	# now perform the dot product operation to get a similarity measure
 	dot_product = merge([target, context], mode='dot', dot_axes=1)
 	dot_product = Reshape((1,))(dot_product)
@@ -76,6 +69,34 @@ def main(args):
 	# create the primary training model
 	model = Model(input=[input_target, input_context], output=output)
 	model.compile(loss='binary_crossentropy', optimizer='rmsprop')
+
+	validation_model = Model(input=[input_target, input_context], output=similarity)
+
+	class SimilarityCallback:
+	    def run_sim(self):
+	        for i in range(valid_size):
+	            valid_word = reverse_dictionary[valid_examples[i]]
+	            top_k = 8  # number of nearest neighbors
+	            sim = self._get_sim(valid_examples[i])
+	            nearest = (-sim).argsort()[1:top_k + 1]
+	            log_str = 'Nearest to %s:' % valid_word
+	            for k in range(top_k):
+	                close_word = reverse_dictionary[nearest[k]]
+	                log_str = '%s %s,' % (log_str, close_word)
+	            print(log_str)
+
+	    @staticmethod
+	    def _get_sim(valid_word_idx):
+	        sim = np.zeros((vocab_size,))
+	        in_arr1 = np.zeros((1,))
+	        in_arr2 = np.zeros((1,))
+	        in_arr1[0,] = valid_word_idx
+	        for i in range(vocab_size):
+	            in_arr2[0,] = i
+	            out = validation_model.predict_on_batch([in_arr1, in_arr2])
+	            sim[i] = out
+	        return sim
+	sim_cb = SimilarityCallback()
 
 	arr_1 = np.zeros((1,))
 	arr_2 = np.zeros((1,))
@@ -89,8 +110,8 @@ def main(args):
 	    loss = model.train_on_batch([arr_1, arr_2], arr_3)
 	    if cnt % 100 == 0:
 	        print("Iteration {}, loss={}".format(cnt, loss))
-	        embed = model.get_layer(name='embedding')
-	        print(embed)
+	    if cnt % 10000 == 0:
+        sim_cb.run_sim()
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
