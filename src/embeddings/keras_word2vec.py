@@ -80,6 +80,5 @@ def main(args):
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
-	parser.add_argument('vectors')
 	parser.add_argument('data')
 	main()
