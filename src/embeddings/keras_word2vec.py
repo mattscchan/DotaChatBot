@@ -23,6 +23,7 @@ def read_vectors(vectorfile):
 			line = re.sub('\n', '', line)
 			dictionary[index] = line
 			index += 1
+			break
 	return dictionary
 
 def read_data(datafile):
@@ -35,6 +36,7 @@ def read_data(datafile):
 			word_context.append(int(row[0]))
 			word_target.append(int(row[1]))
 			labels.append(int(row[2]))
+			break
 	return word_context, word_target, labels
 
 def main(args):
@@ -80,14 +82,15 @@ def main(args):
 	validation_model = Model(input=[input_target, input_context], output=similarity)
 
 	class SimilarityCallback:
+
 	    def run_sim(self):
-	        for i in range(valid_size):
+	        for i in range(0, valid_size):
 	            valid_word = reverse_dictionary[valid_examples[i]]
 	            top_k = 8  # number of nearest neighbors
 	            sim = self._get_sim(valid_examples[i])
 	            nearest = (-sim).argsort()[1:top_k + 1]
 	            log_str = 'Nearest to %s:' % valid_word
-	            for k in range(top_k):
+	            for k in range(0, top_k):
 	                close_word = reverse_dictionary[nearest[k]]
 	                log_str = '%s %s,' % (log_str, close_word)
 	            print(log_str)
@@ -98,18 +101,19 @@ def main(args):
 	        in_arr1 = np.zeros((1,))
 	        in_arr2 = np.zeros((1,))
 	        in_arr1[0,] = valid_word_idx
-	        for i in range(vocab_size):
+	        for i in range(0, vocab_size):
 	            in_arr2[0,] = i
 	            out = validation_model.predict_on_batch([in_arr1, in_arr2])
 	            sim[i] = out
 	        return sim
+
 	sim_cb = SimilarityCallback()
 
 	arr_1 = np.zeros((1,))
 	arr_2 = np.zeros((1,))
 	arr_3 = np.zeros((1,))
 
-	for cnt in range(epochs):
+	for cnt in range(0, epochs):
 	    idx = np.random.randint(0, len(labels)-1)
 	    arr_1[0,] = word_target[idx]
 	    arr_2[0,] = word_context[idx]
