@@ -13,7 +13,7 @@ SEED = int('0xCAFEBABE', 16)
 np.random.seed(SEED)
 tf.set_random_seed(SEED)
 
-def read_data(datafile, vectorfile):
+def read_data(datafile):
 	data = []
 	with open(datafile, 'r', encoding='utf-8') as f:
 		for line in f:
@@ -37,6 +37,7 @@ def main(args):
 	word_context = []
 
 	for convo in data:
+		print(convo)
 		couples, labels = skipgrams(convo, vocab_size, window_size=window_size, sampling_table=sampling_table)
 		tmp_target, tmp_context = zip(*couples)
 		word_target += tmp_target
@@ -80,6 +81,6 @@ def main(args):
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
-	parser.add_argument('vectors')
 	parser.add_argument('data')
-	main()
+	args = parser.parse_args()
+	main(args)
