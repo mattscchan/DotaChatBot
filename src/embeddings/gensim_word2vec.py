@@ -16,7 +16,7 @@ def read_data(filename):
 	return sentences
 
 def main(args):
-	vocab_size = 500000
+	vocab_size = 250000
 	logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=logging.INFO)
 
 	examples = read_data(args.filename)
@@ -36,6 +36,7 @@ def main(args):
 	print(model.wv.similar_by_word('dust', restrict_vocab=vocab_size))
 	print(model.wv.similar_by_word('smoke', restrict_vocab=vocab_size))
 	print(model.wv.similar_by_word('cm', restrict_vocab=vocab_size))
+	print(model.wv.similar_by_word('cancer', restrict_vocab=vocab_size))
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
