@@ -19,6 +19,7 @@ def read_vectors(vectorfile):
 	index = 0
 	with open(vectorfile, 'r', encoding='utf-8') as f:
 		for line in f:
+			line = re.sub('\n', '', line)
 			dictionary[index] = line
 			index += 1
 	return dictionary
