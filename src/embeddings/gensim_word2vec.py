@@ -28,13 +28,14 @@ def main(args):
 
 	sentences = myText()
 	model = gensim.models.Word2Vec(sentences, size=300, max_vocab_size=vocab_size, sg=1, sample=0.0001, seed=SEED, min_count=10, workers=16, iter=5)
+	model.wv.save_word2vec_format('./data/gensim_embeddings'+str(vocab_size/1000)+'.txt', binary=False)
 
 	print(model.wv.similar_by_word('gg', restrict_vocab=vocab_size))
 	print(model.wv.similar_by_word('glhf', restrict_vocab=vocab_size))
 	print(model.wv.similar_by_word('gank', restrict_vocab=vocab_size))
 	print(model.wv.similar_by_word('dust', restrict_vocab=vocab_size))
 	print(model.wv.similar_by_word('smoke', restrict_vocab=vocab_size))
-	model.wv.save_word2vec_format('./data/gensim_embeddings'+str(vocab_size/1000)+'.txt', binary=False)
+	print(model.wv.similar_by_word('cm', restrict_vocab=vocab_size))
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
