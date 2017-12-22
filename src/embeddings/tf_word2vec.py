@@ -97,7 +97,7 @@ def word2vec(batch_gen, iterator, name):
 
 def main(args):
     name = tf.placeholder(tf.string, shape=[None])
-    batch_gen, iterator = create_dataset(name)
+    batch_gen, iterator = create_dataset(name, BATCH_SIZE)
     word2vec(batch_gen, iterator, name)
 
 if __name__ == '__main__':
