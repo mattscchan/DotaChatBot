@@ -26,7 +26,7 @@ def main(args):
 				arr = [word for word in arr if arr != '']
 				total_tokens += len(arr)
 				word_counts.update(arr)
-				total_utt =+ 1
+				total_utt += 1
 			convo_num += 1
 			
 			if convo_num % 100000 == 0:
