@@ -2,7 +2,7 @@ import gensim, logging, argparse, json
 from gensim.models.keyedvectors import KeyedVectors
 
 def main(args):
-	model = KeyedVectors.load(args.vectors, binary=False)
+	model = KeyedVectors.load_word2vec_format(args.vectors, binary=False)
 
 	if args.target == '1':
 		with open('test.txt', 'r', encoding='utf-8') as f:
