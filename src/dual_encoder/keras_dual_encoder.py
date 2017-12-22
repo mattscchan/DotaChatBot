@@ -10,6 +10,7 @@ from tensorflow.python.keras.layers import Input, Embedding, LSTM, Dense, concat
 from tensorflow.python.keras.callbacks import ModelCheckpoint, Callback
 from tensorflow.python.keras.preprocessing.sequence import pad_sequences
 from tensorflow.python.keras import optimizers, initializers
+from gensim.models.keyedvectors import KeyedVectors
 
 SEED = int('0xCAFEBABE', 16)
 np.random.seed(SEED)
@@ -51,21 +52,23 @@ class LossHistory(Callback):
 def combine(c, r):
     return concatenate([c, r], name='Combine')
 
-def model(const, hyper, train, valid, test=None, epochs=1, saved_name=None, saved=False):
+def model(const, hyper, train, valid, test=None, epochs=1, saved_name=None, saved=False, weights=[]):
     if saved:
         print('Loading Dual Encoder')
         dual_encoder = load_model(saved_name)
     else:
         print('Dual LSTM Encoder')
+        print('Embedding')
         encoder = Sequential(name='Encoder')
         encoder.add(Embedding(input_dim=const.vocab_size,
                             output_dim=const.embedding_size,
                             mask_zero=True,
                             trainable=True,
                             input_length=const.max_timesteps,
-                            #weights=[],
-                            name='Embedding'
+                            weights=[weights],
+                            #name='Embedding'
                             ))
+        print('Layers')
         if not hyper.kernel_init:
             hyper.kernel_init='glorot_uniform'
         if not hyper.recurrent_init:
@@ -91,6 +94,7 @@ def model(const, hyper, train, valid, test=None, epochs=1, saved_name=None, save
         similarity = Dense((1), activation = "sigmoid", name='Output') (dropout)
         
         dual_encoder = Model([context, response], similarity, name='Dual_Encoder')
+        dual_encoder.layers[1].trainable=False
     dual_encoder.summary()
     
     optimizer = hyper.optimizer(lr=hyper.lr, clipnorm=hyper.clipnorm)
@@ -133,38 +137,73 @@ def log_history(train_acc, valid_acc, path, test_acc=None):
         path.write(train_acc + ',' + valid_acc + ',' + test_acc + '\n')
 
 def main(args):
-    # ---------------------------------------------------------------------------------------------------- Parameters
+    # ------------------------------------------------------------------------------------------------------ Word Vector
+    print('LOADING WVEC\n------------')
+    if args.words:
+        word_vectors = KeyedVectors.load_word2vec_format('data/gensim_embeddings250.txt', binary=False)
+        word_path = 'token_'
+    else:
+        word_path = ''
+
+    # ------------------------------------------------------------------------------------------------------- Parameters
     hyper = Hyper(
-        hidden_units=[100, 100],
-        lr=0.001,
-        clipnorm=0,
-        batch_size=4096,
+        hidden_units=[200],
+        lr=0.0001,
+        clipnorm=10,
+        batch_size=512,
         dropout=0.5,
         optimizer=optimizers.Adam,
         kernel_init=initializers.RandomUniform(minval=-0.01, maxval=0.01, seed=SEED),
         recurrent_init=initializers.Orthogonal(seed=SEED),
     )
-    const = Const(
-        embedding_size=16,
-        max_timesteps=100,
-        vocab_size=100,
-    )
+    if args.words:
+        const = Const(
+            embedding_size=300,
+            max_timesteps=100,
+            vocab_size=len(word_vectors.index2word)+1,
+        )
+    else:
+        const = Const(
+            embedding_size=16,
+            max_timesteps=100,
+            vocab_size=100,
+        )
     alphabet = ''
+    print(hyper)
+    print(const)
 
-    # ------------------------------------------------------------------------------------------------------ Training
+    if args.words:
+        weights= np.zeros((const.vocab_size, const.embedding_size))
+        for i, v in enumerate(word_vectors.syn0):
+            weights[i, :] = np.array(v)
+        weights = np.array(weights)
+        print(weights.shape, type(weights), weights)
+    else:
+        weights = []
+
+    # --------------------------------------------------------------------------------------------------------- Training
     print('LOADING DATA\n------------')
-    train = load_data('data' +'/'+ args.mini_data + args.tiny_data + 'train.json', const.max_timesteps)
-    valid = load_data('data' +'/'+ args.mini_data + args.tiny_data + 'valid.json', const.max_timesteps)
-    test = load_data('data' +'/'+ args.mini_data + args.tiny_data + 'test.json', const.max_timesteps)
+    train = load_data('data' +'/'+ args.mini_data + args.tiny_data + word_path + 'train.json', const.max_timesteps)
+    valid = load_data('data' +'/'+ args.mini_data + args.tiny_data + word_path + 'valid.json', const.max_timesteps)
+    test = load_data('data' +'/'+ args.mini_data + args.tiny_data + word_path + 'test.json', const.max_timesteps)
     print('Training data:', train.context.shape)
     print('Validation data:', valid.context.shape)
     print('Testing data:', test.context.shape)
 
+
     print('TRAINING MODEL\n--------------')
-    saved_name = args.save_directory + '/' + args.mini_data + args.tiny_data + 'best.keras'
-    log_name = args.save_directory + '/' + args.mini_data + args.tiny_data + 'best.log'
-    train_acc, valid_acc, test_acc = model(const, hyper, train, valid, test, epochs=args.num_epochs, saved_name=saved_name, saved=args.saved)
-    print(train_acc, valid_acc, test_acc)
+    saved_name = args.save_directory + '/' + args.mini_data + args.tiny_data + word_path + 'best.keras'
+    log_name = args.save_directory + '/' + args.mini_data + args.tiny_data + word_path + 'best.log'
+    train_acc, valid_acc, test_acc = model(const, 
+            hyper, 
+            train, 
+            valid, 
+            test, 
+            epochs=args.num_epochs, 
+            saved_name=saved_name, 
+            saved=args.saved,
+            weights=weights,
+            )
     log_history(train_acc=str(train_acc), valid_acc=str(valid_acc),test_acc=str(test_acc), path=log_name)
 
 if __name__ == '__main__':
@@ -176,5 +215,6 @@ if __name__ == '__main__':
     parser.add_argument('-t', '--tiny_data', action='store_const', const= 'tiny_', default='')
     parser.add_argument('-s', '--saved', action='store_true', default=False)
     parser.add_argument('-n', '--num_epochs', type=int, default=1)
+    parser.add_argument('-w', '--words', action='store_true', default=False)
     args = parser.parse_args()
     main(args)
