@@ -40,7 +40,7 @@ def create_dataset(name):
 
     return next_el, train_iterator
 
-def word2vec(batch_gen, iterator):
+def word2vec(batch_gen, iterator, name):
     """ Build the graph for word2vec model and train it """
     # Step 1: define the placeholders for input and output
     with tf.name_scope('data'):
@@ -94,7 +94,7 @@ def word2vec(batch_gen, iterator):
 def main(args):
     name = tf.placeholder(tf.string, shape=[None])
     batch_gen, iterator = create_dataset(name)
-    word2vec(batch_gen, iterator)
+    word2vec(batch_gen, iterator, name)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
