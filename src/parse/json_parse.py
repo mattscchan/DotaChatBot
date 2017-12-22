@@ -6,6 +6,8 @@ import collections
 import random
 import re
 import os
+from gensim.models.keyedvectors import KeyedVectors
+from collections import defaultdict
 
 # Note that the char mappings are just ASCII value of char minus the lowest value (space) = 2
 # 0 is the padding value, 1 is the UNK token and 2 is newline
@@ -14,21 +16,25 @@ import os
 RAND_SEED = int(0xCAFEBABE)
 random.seed(RAND_SEED)
 np.random.seed(RAND_SEED)
+word_vectors = KeyedVectors.load_word2vec_format('data/gensim_embeddings250.txt', binary=False)
+word_dict = defaultdict(int, zip(word_vectors.index2word, [i for i in range(len(word_vectors.index2word))]))
 
-def str_to_int(utt, newline=True):
-	arr = []
+def str_to_int(utt, token_type='str', newline=True):
+        arr = []
 
-	for c in list(utt):
-		if c == 'π':
-			arr.append(1)
-		else:
-			arr.append(ord(c)-29)
+        if token_type == 'str':
+                for c in list(utt):
+                        if c == 'π':
+                                arr.append(1)
+                        else:
+                                arr.append(ord(c)-29)
 
-	if newline:
-		arr.append(2)
-		return arr
-	return arr
+                if newline:
+                        arr.append(2)
+        else:
+                arr = [word_dict[t] for t in utt.split(' ')]
 
+        return arr
 
 class SequenceBuff:
 	def __init__(self, buffersize):
@@ -36,7 +42,7 @@ class SequenceBuff:
 		self.capacity = 0
 		self.internalMem = []
 		
-	def poll(self):
+	def poll(self, token_type):
 		if self.capacity > 2:
 			index = random.randint(0, self.capacity-1)
 		else:
@@ -44,7 +50,7 @@ class SequenceBuff:
 		# make sure to shuffle the buffer
 		if self.capacity < self.buffersize:
 			np.random.shuffle(self.internalMem)
-		return str_to_int(self.internalMem[index])
+		return str_to_int(self.internalMem[index], token_type=token_type)
 
 	def update(self, utterance):
 		# replace
@@ -61,9 +67,13 @@ def main(args):
 	buff = SequenceBuff(args.buffersize)
 	write_arr = []
 	count = 0
-	train_file = './data/train.json'
-	valid_file = './data/valid.json'
-	test_file = './data/test.json'
+	if args.type:
+		tok = 'token_'
+	else:
+		tok = ''
+	train_file = './data/' + tok + 'train.json'
+	valid_file = './data/' + tok + 'valid.json'
+	test_file = './data/' + tok + 'test.json'
 
 	with open(args.filename, 'r', encoding='utf-8') as raw:
 
@@ -84,19 +94,19 @@ def main(args):
 					start = 0
 
 				for index in range(start, start+args.context):
-					context += str_to_int(chat[index])
+					context += str_to_int(chat[index], args.type)
 				
-				next_utt = str_to_int(chat[start + args.context])
+				next_utt = str_to_int(chat[start + args.context], args.type)
 			# need to shrink context
 			else:
 				if len(chat) > 2:
 					for index in range(0, len(chat)-1):
-						context += str_to_int(chat[index])
-					next_utt = str_to_int(chat[len(chat)-1])
+						context += str_to_int(chat[index], args.type)
+					next_utt = str_to_int(chat[len(chat)-1], args.type)
 				else:
 					continue
 
-			fake_utt = buff.poll()
+			fake_utt = buff.poll(args.type)
 			
 			obj_real = {'context': context, 'next_utt': next_utt, 'label': 0}
 			obj_fake = {'context': context, 'next_utt': fake_utt, 'label': 1}
@@ -157,16 +167,19 @@ def main(args):
 	with open(train_file, 'a', encoding='utf-8') as train:
 		for el in train_arr:
 			train.write(json.dumps(el))
+			train.write('\n')
 			
 	# Valid file
 	with open(valid_file, 'a', encoding='utf-8') as valid:
 		for el in valid_arr:
 			valid.write(json.dumps(el))
+			valid.write('\n')
 
 	# Test file
 	with open(test_file, 'a', encoding='utf-8') as test:
 		for el in test_arr:
 			test.write(json.dumps(el))
+			test.write('\n')
 
 
 
@@ -175,5 +188,6 @@ if __name__ == '__main__':
 	parser.add_argument('filename')
 	parser.add_argument('buffersize', type=int)
 	parser.add_argument('context', type=int)
+	parser.add_argument('-t', '--type', action='store_true', default=False)
 	args = parser.parse_args()
 	main(args)

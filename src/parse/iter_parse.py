@@ -2,6 +2,9 @@ import tensorflow as tf
 import xml.etree.ElementTree as ET
 import argparse
 import re
+import json
+import random
+import numpy as np
 # Note that the char mappings are just ASCII value of char minus the lowest value (space) = 2
 # 0 is the padding value, 1 is the UNK token and 2 is newline
 
@@ -9,21 +12,6 @@ import re
 RAND_SEED = int(0xCAFEBABE)
 random.seed(RAND_SEED)
 np.random.seed(RAND_SEED)
-
-def str_to_int(utt, newline=True):
-	arr = []
-
-	for c in list(utt):
-		if c == 'π':
-			arr.append(1)
-		else:
-			arr.append(ord(c)-27)
-
-	if newline:
-		arr.append(2)
-		return arr
-	return arr
-
 
 class SequenceBuff:
 
@@ -40,7 +28,7 @@ class SequenceBuff:
 		# make sure to shuffle the buffer
 		if self.capacity < self.buffersize:
 			np.random.shuffle(self.internalMem)
-		return str_to_int(self.internalMem[index])
+		return self.internalMem[index]
 
 	def update(self, utterance):
 		# replace
@@ -68,12 +56,13 @@ def main(args):
 				utt_num = 0
 				convo = []
 				for utterance in elem:
-					if not re.search(r'\n|\t', utterance.text):
-						convo.append(utterance.text)
-						buff.update(utterance.text)
-
+					if utterance.text != None:
+						if not re.search(r'\n|\t', utterance.text):
+							convo.append(utterance.text)
+							buff.update(utterance.text)
 					utterance.clear()
-					
+					utt_num += 1
+				
 				obj_real = {}
 				obj_fake = {}
 				context = []
@@ -84,16 +73,16 @@ def main(args):
 					obj_real['context_size'] = utt_num-1
 					obj_fake['context_size'] = utt_num-1
 					for i in range(0, utt_num-1):
-						context += str_to_int(convo[i])
+						context += convo[i].lower().split()
 						
-					next_utt = str_to_int(convo[utt_num-1])
+					next_utt = convo[utt_num-1].lower().split()
 				else:
 					obj_real['context_size'] = args.context
 					obj_fake['context_size'] = args.context
 					for i in range(0, args.context):
-						context += str_to_int(convo[i])
-					next_utt = str_to_int(convo[args.context])
-				fake_utt = buff.poll()
+						context += convo[i].lower().split()
+					next_utt = convo[args.context].lower().split()
+				fake_utt = buff.poll().lower().split()
 
 				obj_real['next_utt'] = next_utt
 				obj_real['context'] = context
@@ -117,14 +106,18 @@ def main(args):
 							f.write('\n')
 						del json_objs[:]
 
+	with open(json_file, 'a', encoding='utf-8') as f:
+		for obj in json_objs:
+			f.write(json.dumps(obj))
+			f.write('\n')
+		del json_objs[:]
 
-		
 
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
 	parser.add_argument('filename')
 	parser.add_argument('buffersize', type=int)
-	parser.add('context', type=int)
+	parser.add_argument('context', type=int)
 	args = parser.parse_args()
 	main(args)

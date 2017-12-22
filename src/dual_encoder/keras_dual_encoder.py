@@ -11,6 +11,7 @@ from tensorflow.python.keras.models import Sequential, Model, load_model
 from tensorflow.python.keras.layers import Input, Embedding, LSTM, Dense, concatenate, Dropout
 from tensorflow.python.keras.callbacks import ModelCheckpoint, Callback
 from tensorflow.python.keras import optimizers, initializers
+from gensim.models.keyedvectors import KeyedVectors
 
 from tensorflow.python.keras.estimator import model_to_estimator
 
@@ -19,32 +20,26 @@ np.random.seed(SEED)
 tf.set_random_seed(SEED)
 
 # HYPERPARAMETERS
-Hyper = namedtuple('Hyper', ['hidden_units', 'lr', 'clipnorm', 'batch_size', 
-    'optimizer', 'kernel_init', 'recurrent_init', 'dropout'])
-Const = namedtuple('Const', ['embedding_size', 'max_timesteps', 'vocab_size', 'total_n'])
+Hyper = namedtuple('Hyper', 
+        ['hidden_units', 'lr', 'clipnorm', 'batch_size', 'optimizer', 'kernel_init', 'recurrent_init', 'dropout', 'cnn_filters'])
+Const = namedtuple('Const', ['embedding_size', 'max_timesteps', 'vocab_size'])
 
-def input_fn(filenames, shuffle, batch_size=32, buffer_size=2048):
-    dataset = tf.data.TFRecordDataset(filenames=filenames)
-    dataset = dataset.map(convert_parse.parse)
+# DATASET
+def load_json(file):
+    df = []
+    with open(file, 'r', encoding='utf-8') as f:
+        for line in f:
+            df.append(json.loads(line))
+    return df
 
-    if shuffle:
-        dataset = dataset.shuffle(buffer_size=buffer_size)
-        num_repeat = None # Allow infinite reading of the data.
-    else:
-        num_repeat = 1
+def load_data(file, max_timesteps):
+    Data = namedtuple('Data', ['context', 'response', 'label'])
 
-    dataset = dataset.repeat(num_repeat)
-    dataset = dataset.batch(batch_size)
-    iterator = dataset.make_one_shot_iterator()
-    print(dataset.output_shapes)
-
-    context_batch, response_batch, labels_batch = iterator.get_next()
-
-    # The input-function must return a dict wrapping the images.
-    #x = {'context': context_batch, 'response': response_batch}
-    #y = labels_batch
-
-    return context_batch, response_batch, labels_batch
+    j = load_json(file)
+    d = Data(pad_sequences([i['context'] for i in j], maxlen=max_timesteps, padding='pre'),
+             pad_sequences([i['next_utt'] for i in j], maxlen=max_timesteps, padding='pre'),
+             np.array([i['label'] for i in j]))
+    return d 
 
 class LossHistory(Callback):
     def on_train_begin(self, logs={}):
@@ -60,32 +55,36 @@ class LossHistory(Callback):
 def combine(c, r):
     return concatenate([c, r], name='Combine')
 
-def model(const, hyper, train, valid, test=None, epochs=1, saved_name=None, saved=False):
-
-    # Get data from Dataset API
-    train_c, train_r, train_l = input_fn(train, shuffle=True, batch_size=hyper.batch_size)
-    valid_c, valid_r, valid_l = input_fn(train, shuffle=False, batch_size=hyper.batch_size)
-    #test_d = input_fn(train, shuffle=False, batch_size=hyper.batch_size)
-    print(train_c.shape)
-
+def model(const, hyper, train, valid, test=None, epochs=1, saved_name=None, saved=False, weights=[], cnn=False):
+>>>>>>> master
     if saved:
         print('Loading Dual Encoder')
         dual_encoder = load_model(saved_name)
     else:
         print('Dual LSTM Encoder')
+        print('Embedding')
         encoder = Sequential(name='Encoder')
         encoder.add(Embedding(input_dim=const.vocab_size,
                             output_dim=const.embedding_size,
                             mask_zero=True,
                             trainable=True,
                             input_length=const.max_timesteps,
-                            #weights=[],
-                            name='Embedding'
+                            weights=[weights],
+                            #name='Embedding'
                             ))
+        print('Layers')
         if not hyper.kernel_init:
             hyper.kernel_init='glorot_uniform'
         if not hyper.recurrent_init:
             hyper.recurrent_init='orthogonal'
+
+         # CNN
+         if cnn:
+             for filters in hyper.cnn_filters:
+                 encoder.add(Conv1D(filters, 3))
+                 encoder.add(MaxPooling1D())
+                 encoder.add(Activation('relu'))
+                 encoder.add(BatchNormalization())
 
         ret_seq=True
         for i, units in enumerate(hyper.hidden_units):
@@ -106,8 +105,10 @@ def model(const, hyper, train, valid, test=None, epochs=1, saved_name=None, save
         
         combined = combine(context_encoder, response_encoder)
         if hyper.dropout:
-            combined = Dropout(hyper.dropout)(combined)
-        similarity = Dense((1), activation = "sigmoid", name='Output') (combined)
+            dropout = Dropout(hyper.dropout)(combined)
+        else:
+            dropout = combined
+        similarity = Dense((1), activation = "sigmoid", name='Output') (dropout)
         
         dual_encoder = Model([context, response], similarity, name='Dual_Encoder')
     
@@ -156,35 +157,76 @@ def log_history(train_acc, valid_acc, path, test_acc=None):
         path.write(train_acc + ',' + valid_acc + ',' + test_acc + '\n')
 
 def main(args):
-    # Parameters
+    # ------------------------------------------------------------------------------------------------------ Word Vector
+    print('LOADING WVEC\n------------')
+    if args.words:
+        word_vectors = KeyedVectors.load_word2vec_format('data/gensim_embeddings250.txt', binary=False)
+        word_path = 'token_'
+    else:
+        word_path = ''
+
+    # ------------------------------------------------------------------------------------------------------- Parameters
     hyper = Hyper(
-        hidden_units=[100],
+        hidden_units=[200],
         lr=0.0001,
-        clipnorm=0,
-        batch_size=256,
-        dropout=None,
+        clipnorm=10,
+        batch_size=512,
+        dropout=0.5,
         optimizer=optimizers.Adam,
         kernel_init=initializers.RandomUniform(minval=-0.01, maxval=0.01, seed=SEED),
         recurrent_init=initializers.Orthogonal(seed=SEED),
+        cnn_filters=[64, 64, 64],
     )
-    const = Const(
-        embedding_size=16,
-        max_timesteps=100,
-        vocab_size=100,
-        total_n=13071798,
-    )
+    if args.words:
+        const = Const(
+            embedding_size=300,
+            max_timesteps=100,
+            vocab_size=len(word_vectors.index2word)+1,
+        )
+    else:
+        const = Const(
+            embedding_size=16,
+            max_timesteps=100,
+            vocab_size=100,
+        )
+    alphabet = ''
+    print(hyper)
+    print(const)
+
+    if args.words:
+        weights= np.zeros((const.vocab_size, const.embedding_size))
+        for i, v in enumerate(word_vectors.syn0):
+            weights[i, :] = np.array(v)
+        weights = np.array(weights)
+        print(weights.shape, type(weights), weights)
+    else:
+        weights = []
+
+    # --------------------------------------------------------------------------------------------------------- Training
+    print('LOADING DATA\n------------')
+    train = load_data('data' +'/'+ args.mini_data + args.tiny_data + word_path + 'train.json', const.max_timesteps)
+    valid = load_data('data' +'/'+ args.mini_data + args.tiny_data + word_path + 'valid.json', const.max_timesteps)
+    test = load_data('data' +'/'+ args.mini_data + args.tiny_data + word_path + 'test.json', const.max_timesteps)
+    print('Training data:', train.context.shape)
+    print('Validation data:', valid.context.shape)
+    print('Testing data:', test.context.shape)
+
 
     print('TRAINING MODEL\n--------------')
-    saved_name = args.save_directory + '/' + args.mini_data + args.tiny_data + 'best.keras'
-    saved_name = os.path.join(os.getcwd(), saved_name)
-    print(saved_name)
-    model(const, 
+    saved_name = args.save_directory + '/' + args.mini_data + args.tiny_data + word_path + 'best.keras'
+    log_name = args.save_directory + '/' + args.mini_data + args.tiny_data + word_path + 'best.log'
+    train_acc, valid_acc, test_acc = model(const, 
             hyper, 
-            train='data/' + args.mini_data + args.tiny_data + 'train.tfrecords', 
-            valid='data/' + args.mini_data + args.tiny_data + 'valid.tfrecords', 
-            test='data/' + args.mini_data + args.tiny_data + 'test.tfrecords', 
+            train, 
+            valid, 
+            test, 
             epochs=args.num_epochs, 
-            saved_name=saved_name)
+            saved_name=saved_name, 
+            saved=args.saved,
+            weights=weights,
+            cnn=args.cnn,
+            )
+    log_history(train_acc=str(train_acc), valid_acc=str(valid_acc),test_acc=str(test_acc), path=log_name)
 
 if __name__ == '__main__':
     # TODO load model, automatic naming of model
@@ -195,5 +237,7 @@ if __name__ == '__main__':
     parser.add_argument('-t', '--tiny_data', action='store_const', const= 'tiny_', default='')
     parser.add_argument('-s', '--saved', action='store_true', default=False)
     parser.add_argument('-n', '--num_epochs', type=int, default=1)
+    parser.add_argument('-w', '--words', action='store_true', default=False)
+    parser.add_argument('-c', '--cnn', action='store_true', default=False)
     args = parser.parse_args()
     main(args)

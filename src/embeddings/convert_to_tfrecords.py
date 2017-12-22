@@ -1,18 +1,18 @@
 import tensorflow as tf
 import argparse
 import sys
-import json
+import csv
+import re
 
+def _int64_feature(value):
+    return tf.train.Feature(int64_list=tf.train.Int64List(value=[value]))
 
-def _bytes_feature(value):
-    value = ' '.join(value)
-    return tf.train.Feature(bytes_list=tf.train.BytesList(value=[value.encode('utf-8')]))
-
-def _convert(text):
+def _convert(context, target):
     return tf.train.Example(
             features=tf.train.Features(
                 feature={
-                    'text': _bytes_feature(text),
+                    'context': _int64_feature(context),
+                    'target': _int64_feature(target)
         })).SerializeToString()
 
 def _write_tfrecords(filename, examples_list):
@@ -24,13 +24,20 @@ def _write_tfrecords(filename, examples_list):
 
 def main(args):
     examples = []
-
+  
     with open(args.filename, 'r', encoding='utf-8') as f:
-        for line in f:
-            obj = json.loads(line)
-            examples.append(_convert(obj['chat']))
+        reader = csv.reader(f)
+        index = 0
+        for row in reader:
+            if int(row[2]) == 0:
+                continue
+            examples.append(_convert(int(row[0]), int(row[1])))
+            if index % 1000000:
+                print('We are at', index)
+            index += 1
 
-    _write_tfrecords('./data/billion_chats.tfrecords', examples)
+    print('Writing now...')
+    _write_tfrecords('./data/100k_skipgrams.tfrecords', examples)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
