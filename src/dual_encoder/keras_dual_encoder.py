@@ -56,7 +56,6 @@ def combine(c, r):
     return concatenate([c, r], name='Combine')
 
 def model(const, hyper, train, valid, test=None, epochs=1, saved_name=None, saved=False, weights=[], cnn=False):
->>>>>>> master
     if saved:
         print('Loading Dual Encoder')
         dual_encoder = load_model(saved_name)
@@ -94,11 +93,8 @@ def model(const, hyper, train, valid, test=None, epochs=1, saved_name=None, save
                 kernel_initializer=hyper.kernel_init, 
                 recurrent_initializer=hyper.recurrent_init))
         
-        #context = Input(shape=(const.max_timesteps,), dtype='int32', name='context')
-        #response = Input(shape=(const.max_timesteps,), dtype='int32', name='response')
-        context = Input(tensor=train_c, name='context')
-        response = Input(tensor=train_r, name='response')
-        label = Input(tensor=train_l, name='label')
+        context = Input(shape=(const.max_timesteps,), dtype='int32', name='context')
+        response = Input(shape=(const.max_timesteps,), dtype='int32', name='response')
         
         context_encoder = encoder(context)
         response_encoder = encoder(response)
@@ -114,31 +110,27 @@ def model(const, hyper, train, valid, test=None, epochs=1, saved_name=None, save
     
     dual_encoder.summary()
     optimizer = hyper.optimizer(lr=hyper.lr, clipnorm=hyper.clipnorm)
+    dual_encoder.compile(optimizer=optimizer, loss='binary_crossentropy', metrics=['accuracy'])
 
-    dual_encoder.compile(optimizer=optimizer, 
-            loss='binary_crossentropy', 
-            metrics=['accuracy'], 
-            target_tensors=[label],
-            )
+    history = LossHistory()
+    checkpoint = ModelCheckpoint(saved_name, monitor='val_acc', mode='auto', save_best_only=True, verbose=1)
+    callback_list = [checkpoint, history]
 
-    dual_encoder.fit(#None, label, 
-            #batch_size=hyper.batch_size,
-            steps_per_epoch=int(const.total_n/hyper.batch_size), 
-            epochs=epochs, 
-            #validation_data=([valid_c,valid_r], valid_l),
-            #validation_steps=10,
-            )
+    dual_encoder.fit([train.context, train.response], train.label,
+              batch_size=hyper.batch_size,
+              epochs=epochs,
+              validation_data=([valid.context, valid.response], valid.label),
+              shuffle=True,
+              callbacks=callback_list,
+              )
 
-    # Covert Keras to Estimator
-    #de_estimator = model_to_estimator(keras_model=dual_encoder, model_dir=saved_name)
-    #de_estimator.train(input_fn=lambda:input_fn(train, shuffle=True, batch_size=hyper.batch_size))
-    #train_op = tf.estimator.TrainSpec(input_fn=lambda:input_fn(train, shuffle=True, batch_size=hyper.batch_size))
-    #valid_op = tf.estimator.EvalSpec(input_fn=lambda:input_fn(valid, shuffle=True, batch_size=hyper.batch_size))
-    #tf.estimator.train_and_evaluate(de_estimator, train_op, valid_op)
+    if test:
+        score = dual_encoder.evaluate([test.context, test.response], test.label, batch_size=hyper.batch_size)
+        test_acc = score[1]
+    else:
+        test_acc = None
 
-    #test_op = de_estimator.predict(input_fn=lambda:input_fn(test, labels=None
-
-    #return history.train_acc, history.valid_acc, test_acc
+    return history.train_acc, history.valid_acc, test_acc
 
 def clean_funcname(string):
     if string:
