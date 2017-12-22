@@ -5,7 +5,7 @@ def main(args):
 	model = KeyedVectors.load_word2vec_format(args.vectors, binary=False)
 
 	if args.target == '1':
-		with open('test.txt', 'r', encoding='utf-8') as f:
+		with open('./data/lookup_sim.txt', 'r', encoding='utf-8') as f:
 			for line in f:
 				print(model.similar_by_word(line))
 	else:
