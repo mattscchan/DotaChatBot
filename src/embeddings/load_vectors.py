@@ -9,7 +9,7 @@ def main(args):
 			for line in f:
 				print(model.similar_by_word(line))
 	else:
-		model.similar_by_word(args.target)
+		print(model.similar_by_word(args.target))
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
