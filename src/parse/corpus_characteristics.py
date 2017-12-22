@@ -44,7 +44,7 @@ def main(args):
 		with open('./data/corpus_chars.txt', 'w', encoding='utf-8') as f2:
 			for el in stats:
 				print(el)
-				f2.write(el)
+				f2.write(str(el))
 				f2.write('\n')
 
 
