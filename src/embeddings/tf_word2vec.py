@@ -27,12 +27,16 @@ def _parse_function(example_proto):
     }
     parsed_features = tf.parse_single_example(example_proto, features)
 
-    return parsed_features['context'], tf.reshape(parsed_features['target'], [None,1])
+    return parsed_features['context'], parsed_features['target']
+
+def _other(x, y):
+    return x, tf.reshape(y, [None, 1])
 
 def create_dataset(name, batch_size):
     data = tf.data.TFRecordDataset(name)
-    data = data.map(_parse_function, num_parallel_calls=16)
+    data = data.map(_parse_function, num_parallel_calls=8)
     data = data.batch(batch_size)
+    data = data.map(_other, num_parallel_calls=8)
     data = data.shuffle(100000)
     data = data.prefetch(100000)
     train_iterator = data.make_initializable_iterator()
@@ -93,7 +97,7 @@ def word2vec(batch_gen, iterator, name):
 
 def main(args):
     name = tf.placeholder(tf.string, shape=[None])
-    batch_gen, iterator = create_dataset(name, BATCH_SIZE)
+    batch_gen, iterator = create_dataset(name)
     word2vec(batch_gen, iterator, name)
 
 if __name__ == '__main__':
