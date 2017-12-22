@@ -27,7 +27,7 @@ def _parse_function(example_proto):
     }
     parsed_features = tf.parse_single_example(example_proto, features)
 
-    return parsed_features['context'], parsed_features['target']
+    return parsed_features['context'], tf.reshape(parsed_features['target'], [None,1])
 
 def create_dataset(name, batch_size):
     data = tf.data.TFRecordDataset(name)
