@@ -10,8 +10,6 @@ import numpy as np
 import tensorflow as tf
 from tensorflow.contrib.tensorboard.plugins import projector
 
-from process_data import process_data
-
 VOCAB_SIZE = 50000
 BATCH_SIZE = 128
 EMBED_SIZE = 128 # dimension of the word embedding vectors
@@ -24,17 +22,21 @@ SKIP_STEP = 2000 # how many steps to skip before reporting the loss
 
 def _parse_function(example_proto):
     features = {
-        "context": tf.FixedLenFeature([], tf.float32),
+        "context": tf.FixedLenFeature([], tf.int64),
         "target": tf.FixedLenFeature([], tf.int64)
     }
     parsed_features = tf.parse_single_example(example_proto, features)
 
     return parsed_features['context'], parsed_features['target']
 
-def create_dataset(name):
+def _other(x, y):
+    return x, tf.reshape(y, [None, 1])
+
+def create_dataset(name, batch_size):
     data = tf.data.TFRecordDataset(name)
     data = data.map(_parse_function, num_parallel_calls=8)
-    data = data.batch(100)
+    data = data.batch(batch_size)
+    data = data.map(_other, num_parallel_calls=8)
     data = data.shuffle(100000)
     data = data.prefetch(100000)
     train_iterator = data.make_initializable_iterator()
@@ -42,7 +44,7 @@ def create_dataset(name):
 
     return next_el, train_iterator
 
-def word2vec(batch_gen, iterator):
+def word2vec(batch_gen, iterator, name):
     """ Build the graph for word2vec model and train it """
     # Step 1: define the placeholders for input and output
     with tf.name_scope('data'):
@@ -95,8 +97,8 @@ def word2vec(batch_gen, iterator):
 
 def main(args):
     name = tf.placeholder(tf.string, shape=[None])
-    batch_gen, iterator = create_dataset(name)
-    word2vec(batch_gen, iterator)
+    batch_gen, iterator = create_dataset(name, BATCH_SIZE)
+    word2vec(batch_gen, iterator, name)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
