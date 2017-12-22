@@ -20,7 +20,7 @@ def main(args):
 		for line in f:
 			obj = json.loads(line)
 			chat = obj['chat']
-			
+
 			for utt in chat:
 				arr = utt.split()
 				arr = [word for word in arr if arr != '']
@@ -28,7 +28,12 @@ def main(args):
 				word_counts.update(arr)
 				total_utt =+ 1
 			convo_num += 1
+			
+			if convo_num % 100000 == 0:
+				print('We at', convo_num)
 		unique_tokens = len(word_counts)
+
+		
 
 		stats = []
 		stats.append(convo_num)
