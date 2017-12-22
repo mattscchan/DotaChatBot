@@ -39,7 +39,7 @@ def main(args):
 		stats.append(convo_num)
 		stats.append(unique_tokens)
 		stats.append(total_tokens)
-		stats.append(total_tokens)
+		stats.append(total_utt)
 
 		with open('./data/corpus_chars.txt', 'w', encoding='utf-8') as f2:
 			for el in stats:
