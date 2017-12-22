@@ -18,7 +18,7 @@ tf.set_random_seed(SEED)
 
 # HYPERPARAMETERS
 Hyper = namedtuple('Hyper', 
-        ['hidden_units', 'lr', 'clipnorm', 'batch_size', 'optimizer', 'kernel_init', 'recurrent_init', 'dropout'])
+        ['hidden_units', 'lr', 'clipnorm', 'batch_size', 'optimizer', 'kernel_init', 'recurrent_init', 'dropout', 'cnn_filters'])
 Const = namedtuple('Const', ['embedding_size', 'max_timesteps', 'vocab_size'])
 
 # DATASET
@@ -52,7 +52,7 @@ class LossHistory(Callback):
 def combine(c, r):
     return concatenate([c, r], name='Combine')
 
-def model(const, hyper, train, valid, test=None, epochs=1, saved_name=None, saved=False, weights=[]):
+def model(const, hyper, train, valid, test=None, epochs=1, saved_name=None, saved=False, weights=[], cnn=False):
     if saved:
         print('Loading Dual Encoder')
         dual_encoder = load_model(saved_name)
@@ -73,6 +73,15 @@ def model(const, hyper, train, valid, test=None, epochs=1, saved_name=None, save
             hyper.kernel_init='glorot_uniform'
         if not hyper.recurrent_init:
             hyper.recurrent_init='orthogonal'
+
+         # CNN
+         if cnn:
+             for filters in hyper.cnn_filters:
+                 encoder.add(Conv1D(filters, 3))
+                 encoder.add(MaxPooling1D())
+                 encoder.add(Activation('relu'))
+                 encoder.add(BatchNormalization())
+
         ret_seq=True
         for i, units in enumerate(hyper.hidden_units):
             if i == len(hyper.hidden_units)-1:
@@ -155,6 +164,7 @@ def main(args):
         optimizer=optimizers.Adam,
         kernel_init=initializers.RandomUniform(minval=-0.01, maxval=0.01, seed=SEED),
         recurrent_init=initializers.Orthogonal(seed=SEED),
+        cnn_filters=[64, 64, 64],
     )
     if args.words:
         const = Const(
@@ -203,6 +213,7 @@ def main(args):
             saved_name=saved_name, 
             saved=args.saved,
             weights=weights,
+            cnn=args.cnn,
             )
     log_history(train_acc=str(train_acc), valid_acc=str(valid_acc),test_acc=str(test_acc), path=log_name)
 
@@ -216,5 +227,6 @@ if __name__ == '__main__':
     parser.add_argument('-s', '--saved', action='store_true', default=False)
     parser.add_argument('-n', '--num_epochs', type=int, default=1)
     parser.add_argument('-w', '--words', action='store_true', default=False)
+    parser.add_argument('-c', '--cnn', action='store_true', default=False)
     args = parser.parse_args()
     main(args)
